@@ -2,8 +2,11 @@
 # EventMachine packet transmission loop for the xAP protocol
 # (C)2012 Mike Bourgeous
 
+path = File.expand_path(File.dirname(__FILE__))
+
 require 'eventmachine'
 require 'logic_system'
+require File.join(path, 'parser/xap_parse.rb')
 
 class XapHandler < EM::Connection
 	def puts *a
@@ -17,8 +20,8 @@ class XapHandler < EM::Connection
 	def post_init
 		puts 'post_init'
 		EM.add_periodic_timer(1) {
-			puts "Timer"
 			send_heartbeat 'nl.depth.theater-cam', 'FFABCD00', 1
+			send_datagram 'invalid', '255.255.255.255', 3639
 		}
 	end
 
@@ -27,11 +30,16 @@ class XapHandler < EM::Connection
 	end
 
 	def receive_data d
-		# TODO: Parse as xAP packet
-		puts "receive_data (#{d.length}): #{d.inspect}"
+		begin
+			puts "receive_data(#{d.length}): #{ParseXap.parse(d).blocks}"
+		rescue Exception => e
+			puts "Error parsing incoming message: #{e}"
+			puts "receive_data(#{d.length}) invalid: #{d.inspect}"
+		end
 	end
 
 	# Broadcasts an xAP heartbeat from the given address and UID.
+	#
 	# src_addr and src_uid should be convertible to the exact strings that
 	# should go into the packet.  interval is how often other devices
 	# should expect the heartbeat, in seconds.
