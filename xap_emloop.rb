@@ -23,10 +23,6 @@ class XapHandler < EM::Connection
 		send_datagram("Test Data\r\n", '255.255.255.255', 3639)
 	end
 
-	def connection_completed
-		puts 'connection_completed'
-	end
-
 	def unbind
 		puts 'unbind'
 	end
