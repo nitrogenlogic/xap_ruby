@@ -2,10 +2,11 @@
 # EventMachine packet transmission loop for the xAP protocol
 # (C)2012 Mike Bourgeous
 
-path = File.expand_path(File.dirname(__FILE__))
-
 require 'eventmachine'
 require 'logic_system'
+
+path = File.expand_path(File.dirname(__FILE__))
+require File.join(path, 'xap.rb')
 require File.join(path, 'parser/parse_xap.rb')
 
 class XapHandler < EM::Connection
@@ -32,6 +33,7 @@ class XapHandler < EM::Connection
 	def receive_data d
 		begin
 			puts "receive_data(#{d.length}): #{ParseXap.parse(d).to_hash}"
+			XapMessage.parse d
 		rescue Exception => e
 			puts "Error parsing incoming message: #{e}"
 			puts "receive_data(#{d.length}) invalid: #{d.inspect}"
@@ -82,5 +84,7 @@ if __FILE__ == $0
 
 		# EventMachine doesn't seem to support using '::' for IP address
 		EM.open_datagram_socket '0.0.0.0', 3639, XapHandler, "xAP IPv4"
+
+		# TODO: xAP hub support
 	}
 end

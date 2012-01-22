@@ -87,6 +87,16 @@ module Xap
 	end
 
 	class Message < Treetop::Runtime::SyntaxNode
+		# Returns the name of the first message block
+		def first_block
+			elements.each do |el|
+				if el.is_a? MessageBlock
+					return el.keyword.text_value
+				end
+			end
+			nil
+		end
+
 		def to_hash
 			h = {}
 			elements.each do |el|
