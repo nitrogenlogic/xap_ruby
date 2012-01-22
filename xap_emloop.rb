@@ -9,6 +9,8 @@ path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, 'xap.rb')
 require File.join(path, 'parser/parse_xap.rb')
 
+XAP_PORT=3639
+
 class XapHandler < EM::Connection
 	def puts *a
 		STDOUT.puts "#{@servername}: #{a.join("\n")}"
@@ -70,7 +72,7 @@ class XapHandler < EM::Connection
 			"interval=#{interval}\n" +
 			"}\n"
 
-		send_datagram(msg, '255.255.255.255', 3639)
+		send_datagram(msg, '255.255.255.255', XAP_PORT)
 	end
 end
 
@@ -82,7 +84,7 @@ if __FILE__ == $0
 		}
 
 		# EventMachine doesn't seem to support using '::' for IP address
-		EM.open_datagram_socket '0.0.0.0', 3639, XapHandler, "xAP IPv4"
+		EM.open_datagram_socket '0.0.0.0', XAP_PORT, XapHandler, "xAP IPv4"
 
 		# TODO: xAP hub support
 	}
