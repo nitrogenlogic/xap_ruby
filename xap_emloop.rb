@@ -31,7 +31,7 @@ class XapHandler < EM::Connection
 
 	def receive_data d
 		begin
-			puts "receive_data(#{d.length}): #{ParseXap.parse(d).blocks}"
+			puts "receive_data(#{d.length}): #{ParseXap.parse(d).to_hash}"
 		rescue Exception => e
 			puts "Error parsing incoming message: #{e}"
 			puts "receive_data(#{d.length}) invalid: #{d.inspect}"

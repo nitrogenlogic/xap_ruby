@@ -29,7 +29,7 @@ module ParseXap
 end
 
 if File.expand_path(__FILE__) == File.expand_path($0)
-	puts ParseXap.parse(<<-EOF).blocks
+	puts ParseXap.parse(<<-EOF).to_hash
 xap-header
 {
 v=12

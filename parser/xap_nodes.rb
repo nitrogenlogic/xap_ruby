@@ -58,7 +58,7 @@ module Xap
 	end
 
 	class Message < Treetop::Runtime::SyntaxNode
-		def blocks
+		def to_hash
 			h = {}
 			elements.each do |el|
 				if el.is_a? MessageBlock
