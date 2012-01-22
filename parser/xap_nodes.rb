@@ -20,9 +20,6 @@ module Xap
 	end
 
 	class Value < Treetop::Runtime::SyntaxNode
-		def raw_value
-			val.raw_value
-		end
 	end
 
 	class KeyValuePair < Treetop::Runtime::SyntaxNode
@@ -36,7 +33,7 @@ module Xap
 
 		def to_s
 			s = "#{key}"
-			if value.val.is_a? HexValue
+			if is_hex?
 				s << '!'
 			else
 				s << '='
@@ -45,6 +42,9 @@ module Xap
 			s
 		end
 
+		def is_hex?
+			value.val.is_a? HexValue
+		end
 	end
 
 	class Pairs < Treetop::Runtime::SyntaxNode
