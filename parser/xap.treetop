@@ -1,0 +1,47 @@
+# Treetop grammar file for parsing xAP
+# (C)2012 Mike Bourgeous
+
+grammar Xap
+	rule keyword
+		# The xAP message grammar in the spec doesn't say that periods
+		# can be included in keywords, but the example messages include
+		# periods in keywords.  TODO: handle odd number of hex digits
+		[-A-Za-z0-9_ ]+ ( '.' [-A-Za-z0-9_ ]+ )* <Keyword>
+	end
+
+	rule ascii
+		[^\n]* <AsciiValue>
+	end
+
+	rule hex
+		[A-Z0-9]* <HexValue>
+	end
+
+	rule space
+		[\s]+
+	end
+
+	rule eol
+		"\n"
+	end
+
+	rule value
+		delim:'=' val:ascii / delim:'!' val:hex <Value>
+	end
+
+	rule kvp
+		keyword value eol <KeyValuePair>
+	end
+
+	rule pairs
+		kvp* <Pairs>
+	end
+
+	rule block
+		keyword eol '{' eol pairs '}' eol <MessageBlock>
+	end
+
+	rule message
+		block* <Message>
+	end
+end
