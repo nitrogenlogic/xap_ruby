@@ -141,7 +141,7 @@ class XapMessage
 	def to_s
 		s = "#{headername}\n" +
 			"{\n" +
-			"ver=#{@version}\n" +
+			"v=#{@version}\n" +
 			"hop=#{@hop}\n" +
 			"uid=#{@uid}\n" +
 			"class=#{@msgclass}\n" +
