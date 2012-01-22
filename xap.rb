@@ -72,10 +72,9 @@ class XapAddress
 	end
 end
 
-# Base class for all xAP message types.  Registered subclasses should implement
-# an initialize method that accepts the Treetop node hierarchy and resulting
-# hash as its first two parameters (TODO: Use a special method instead of
-# initialize, to allow other code to call initialize).
+# Base class for all xAP message types.  Registered subclasses must implement
+# a parse method that accepts the Treetop node hierarchy and resulting hash as
+# its first two parameters.
 class XapMessage
 	@@msgtypes = {}
 
@@ -99,7 +98,7 @@ class XapMessage
 		handler = @@msgtypes[headername][classname] || @@Msgtypes[headername][nil]
 		raise "No handler defined for #{classname} messages." unless handler
 
-		handler.new msg, msghash
+		handler.parse msg, msghash
 	end
 
 	# Registers the given klass as the handler for msgclass messages, with
@@ -189,12 +188,21 @@ class XapHeartbeat < XapMessage
 
 	attr_accessor :interval
 
-	def initialize msg, hash
-		puts "New heartbeat"
-		parse_header hash['xap-hbeat']
+	def self.parse msg, hash
+		puts "Parsed heartbeat"
+		self.new msg, hash
+	end
+
+	def initialize src_addr, src_uid, interval = 60
 		@headername = 'xap-hbeat'
-		@interval = hash['interval'] || 60
-		add_header 'interval', @interval
+		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
+			parse_header src_uid['xap-hbeat']
+			interval = src_uid['xap-hbeat']['interval'] || interval
+		else
+			super 'xap-hbeat.alive', src_addr, src_uid
+		end
+		add_header 'interval', interval
+		@interval = interval
 	end
 end
 
