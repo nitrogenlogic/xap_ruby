@@ -22,7 +22,6 @@ class XapHandler < EM::Connection
 		puts 'post_init'
 		EM.add_periodic_timer(1) {
 			send_heartbeat 'nl.depth.theater-cam', 'FFABCD00', 1
-			send_datagram 'invalid', '255.255.255.255', 3639
 		}
 	end
 
