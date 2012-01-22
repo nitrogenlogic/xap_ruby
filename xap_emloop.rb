@@ -6,6 +6,14 @@ require 'eventmachine'
 require 'logic_system'
 
 class XapHandler < EM::Connection
+	def puts *a
+		STDOUT.puts "#{@servername}: #{a.join("\n")}"
+	end
+
+	def initialize servername
+		@servername = servername
+	end
+
 	def post_init
 		puts 'post_init'
 		EM.add_periodic_timer(1) {
@@ -35,6 +43,7 @@ if __FILE__ == $0
 			puts e, e.backtrace.join("\n\t")
 		}
 
-		EM.open_datagram_socket '0.0.0.0', 3639, XapHandler
+		# EventMachine doesn't seem to support using '::' for IP address
+		EM.open_datagram_socket '0.0.0.0', 3639, XapHandler, "IPv4"
 	}
 end
