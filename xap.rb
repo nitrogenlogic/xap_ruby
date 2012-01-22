@@ -15,6 +15,12 @@ class XapAddress
 		# As far as I can tell, the xAP spec isn't very clear on how
 		# long an address can be, whether the subaddress is specified
 		# by a colon or a period, etc.
+		#
+		# This section says that both instance and subaddr can have any depth
+		# http://www.xapautomation.org/index.php?title=Protocol_definition#Message_Addressing_Schemes
+		#
+		# This section makes the distinction between : and . less clear
+		# http://www.xapautomation.org/index.php?title=Protocol_definition#Wildcarding_of_Addresses_via_Header
 		tokens = addr.split ':', 2
 		addr = tokens[0].split '.', 4
 		subaddr = addr[3]
