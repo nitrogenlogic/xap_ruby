@@ -6,7 +6,7 @@ path = File.expand_path(File.dirname(__FILE__))
 
 require 'eventmachine'
 require 'logic_system'
-require File.join(path, 'parser/xap_parse.rb')
+require File.join(path, 'parser/parse_xap.rb')
 
 class XapHandler < EM::Connection
 	def puts *a
