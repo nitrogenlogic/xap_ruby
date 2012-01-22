@@ -33,6 +33,18 @@ module Xap
 		def val
 			value.val.raw_value
 		end
+
+		def to_s
+			s = "#{key}"
+			if value.val.is_a? HexValue
+				s << '!'
+			else
+				s << '='
+			end
+			s << value.val.text_value
+			s
+		end
+
 	end
 
 	class Pairs < Treetop::Runtime::SyntaxNode
@@ -45,6 +57,16 @@ module Xap
 			end
 			h
 		end
+
+		def to_s
+			s = ''
+			elements.each do |el|
+				if el.is_a? KeyValuePair
+					s << "#{el.to_s}\n"
+				end
+			end
+			s
+		end
 	end
 
 	class MessageBlock < Treetop::Runtime::SyntaxNode
@@ -54,6 +76,13 @@ module Xap
 
 		def values
 			pairs.to_hash
+		end
+
+		def to_s
+			s = "#{keyword.text_value}\n{\n"
+			s << pairs.to_s
+			s << "}\n"
+			s
 		end
 	end
 
@@ -66,6 +95,16 @@ module Xap
 				end
 			end
 			h
+		end
+
+		def to_s
+			s = ""
+			elements.each do |el|
+				if el.is_a? MessageBlock
+					s << el.to_s
+				end
+			end
+			s
 		end
 	end
 end

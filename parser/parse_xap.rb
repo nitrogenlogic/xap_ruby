@@ -29,7 +29,7 @@ module ParseXap
 end
 
 if File.expand_path(__FILE__) == File.expand_path($0)
-	puts ParseXap.parse(<<-EOF).to_hash
+	msg = <<-EOF
 xap-header
 {
 v=12
@@ -43,4 +43,20 @@ ASchema.ASchemaType
 mybinary!68656C6C6F
 }
 	EOF
+	node = ParseXap.parse(msg)
+	puts node.to_hash, node
+
+	s = node.to_s
+	if s != msg
+		puts "Before and after do not match!"
+		before = msg.lines
+		after = s.lines
+
+		begin
+			loop do
+				puts "#{before.next.inspect}\t-\t#{after.next.inspect}"
+			end
+		rescue StopIteration
+		end
+	end
 end
