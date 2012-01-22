@@ -32,9 +32,9 @@ class XapHandler < EM::Connection
 	def receive_data d
 		begin
 			puts "receive_data(#{d.length}): #{ParseXap.parse(d).to_hash}"
-			XapMessage.parse d
+			puts "Message:\n\t#{XapMessage.parse(d).to_s.lines.to_a.join("\t")}"
 		rescue Exception => e
-			puts "Error parsing incoming message: #{e}"
+			puts "Error parsing incoming message: #{e}\n\t#{e.backtrace.join("\n\t")}"
 			puts "receive_data(#{d.length}) invalid: #{d.inspect}"
 		end
 	end
