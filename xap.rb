@@ -101,8 +101,8 @@ class XapMessage
 		raise 'Message lacks a class field in its header.' unless classname || @@msgtypes[headername][nil]
 		classname.downcase!
 
-		handler = @@msgtypes[headername][classname] || @@Msgtypes[headername][nil]
-		raise "No handler defined for #{classname} messages." unless handler
+		handler = @@msgtypes[headername][classname] || @@msgtypes[headername][nil]
+		raise "No handler defined for #{headername}/#{classname} messages." unless handler
 
 		handler.parse msg, msghash
 	end
@@ -114,8 +114,8 @@ class XapMessage
 	# with the given header name that don't have a specific class handler
 	# registered.
 	def self.register_class klass, msgclass, headername='xap-header'
-		raise 'klass must be a Class' unless klass.is_a? Class
-		raise 'msgclass must be (convertible to) a String' unless msgclass.respond_to? :to_s
+		raise 'klass must be a Class that inherits XapMessage' unless klass.is_a?(Class) && klass < self
+		raise 'msgclass must be nil or a String' unless msgclass.nil? || msgclass.is_a?(String)
 
 		puts "Registered support for #{headername}/#{msgclass} messages via #{klass.name}"
 
@@ -123,7 +123,7 @@ class XapMessage
 		headername.downcase!
 		msgclass.downcase! if msgclass.is_a? String
 		@@msgtypes[headername] = @@msgtypes[headername] || {}
-		@@msgtypes[headername][msgclass.to_s] = klass
+		@@msgtypes[headername][msgclass] = klass
 	end
 
 	# msgclass - the message's class
@@ -161,8 +161,18 @@ class XapMessage
 		end
 
 		s << "}\n"
+
+		if @blocks
+			@blocks.each do |name, block|
+				s << "#{name}\n{\n"
+				block.each do |k, v|
+					s << "#{k}=#{v}\n"
+				end
+				s << "}\n"
+			end
+		end
+
 		s
-		# TODO: message block bodies (create XapBlock class, with XapHeader etc. as subclasses?)
 	end
 
 	# Parses standard xAP header information from the given header hash,
@@ -186,6 +196,42 @@ class XapMessage
 		@headers ||= {}
 		@headers[key] = value
 	end
+
+	# Adds the given hash as a block under the given name (TODO: hexadecimal fields)
+	# FIXME: can multiple blocks have the same name in xAP?
+	def add_block name, hash
+		@blocks ||= {}
+		@blocks[name] = hash
+	end
+
+	# Sets the block list to the given hash
+	def set_blocks hash
+		@blocks = hash
+	end
+end
+
+# A fallback class (or inheritable utility class) for unsupported messages.
+class XapUnsupportedMessage < XapMessage
+	XapMessage.register_class self, nil
+
+	def self.parse msg, hash
+		puts "Fallback"
+		self.new msg, hash, nil
+	end
+
+	def initialize msgclass, src_addr, src_uid, target_addr = nil
+		@headername ||= 'xap-header'
+		if msgclass.is_a?(Treetop::Runtime::SyntaxNode) && src_addr.is_a?(Hash)
+			puts src_addr
+			parse_header src_addr[@headername]
+
+			blocks = src_addr.clone
+			blocks.delete @headername
+			set_blocks blocks
+		else
+			super msgclass, src_addr, src_uid, target_addr
+		end
+	end
 end
 
 # An xAP heartbeat message.
@@ -195,15 +241,15 @@ class XapHeartbeat < XapMessage
 	attr_accessor :interval
 
 	def self.parse msg, hash
-		puts "Parsed heartbeat"
+		puts "Heartbeat"
 		self.new msg, hash
 	end
 
 	def initialize src_addr, src_uid, interval = 60
 		@headername = 'xap-hbeat'
 		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
-			parse_header src_uid['xap-hbeat']
-			interval = src_uid['xap-hbeat']['interval'] || interval
+			parse_header src_uid[@headername]
+			interval = src_uid[@headername]['interval'] || interval
 		else
 			super 'xap-hbeat.alive', src_addr, src_uid
 		end
