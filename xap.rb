@@ -114,7 +114,9 @@ class XapMessage
 	# with the given header name that don't have a specific class handler
 	# registered.
 	def self.register_class klass, msgclass, headername='xap-header'
-		raise 'klass must be a Class that inherits XapMessage' unless klass.is_a?(Class) && klass < self
+		unless klass.is_a?(Class) && klass < XapMessage
+			raise "klass must be a Class that inherits XapMessage, not #{klass.inspect}"
+		end
 		raise 'msgclass must be nil or a String' unless msgclass.nil? || msgclass.is_a?(String)
 
 		puts "Registered support for #{headername}/#{msgclass} messages via #{klass.name}"

@@ -7,6 +7,7 @@ require 'logic_system'
 
 path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, 'xap.rb')
+require File.join(path, 'schema/xap_bsc.rb')
 require File.join(path, 'parser/parse_xap.rb')
 
 XAP_PORT=3639
