@@ -145,6 +145,8 @@ class XapMessage
 		@msgclass = msgclass
 	end
 
+	# Returns a string representation of the message suitable for
+	# transmission on the network.
 	def to_s
 		s = "#{headername}\n" +
 			"{\n" +
