@@ -226,7 +226,6 @@ class XapUnsupportedMessage < XapMessage
 	def initialize msgclass, src_addr, src_uid, target_addr = nil
 		@headername ||= 'xap-header'
 		if msgclass.is_a?(Treetop::Runtime::SyntaxNode) && src_addr.is_a?(Hash)
-			puts src_addr
 			parse_header src_addr[@headername]
 
 			blocks = src_addr.clone
