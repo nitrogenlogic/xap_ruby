@@ -222,6 +222,11 @@ class XapMessage
 		s
 	end
 
+	# Returns the last two digits of the UID
+	def uid_endpoint
+		@uid[-2, 2]
+	end
+
 	# Parses standard xAP header information from the given header hash,
 	# such as protocol version, hop count, unique ID, message class,
 	# message source, and message target.
@@ -234,7 +239,7 @@ class XapMessage
 		@target_addr = XapAddress.parse header['target']
 		@version = header['v']
 		@hop = header['hop']
-		@uid = header['uid'] # TODO: Parse UID/add UID class/merge with Address?
+		@uid = header['uid'] # TODO: Parse/validate UID/add UID class/merge with Address?
 		@msgclass = header['class']
 	end
 
