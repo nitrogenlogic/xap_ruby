@@ -22,13 +22,13 @@ class XapHandler < EM::Connection
 
 	def post_init
 		puts 'post_init'
-		EM.add_periodic_timer(1) {
+		EM.add_periodic_timer(5) {
 			hb = XapHeartbeat.new(
 					XapAddress.new('nl', 'depth', 'theater-cam'),
 					'FFABCD30',
-					1)
+					5)
 			send_datagram(hb, '255.255.255.255', XAP_PORT)
-			send_heartbeat 'nl.depth.theater-cam', 'FFABCD00', 1
+			send_heartbeat 'nl.depth.theater-cam', 'FFABCD00', 5
 		}
 	end
 
