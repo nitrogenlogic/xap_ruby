@@ -17,7 +17,7 @@ class XapBscMessage < XapUnsupportedMessage
 		puts 'XapBscMessage initialize' # XXX
 		super msgclass, src_addr, src_uid, target_addr
 
-		# TODO: Parse blocks into input/output state changes
+		raise 'xAP BSC messages must have at least one block' if @blocks.length == 0
 	end
 
 	# TODO: Yields a hash for each input.* block in the message.
@@ -69,18 +69,122 @@ class XapBscQuery < XapBscMessage
 	end
 end
 
-class XapBscEvent < XapBscMessage
-	register_class self, 'xAPBSC.event'
+class XapBscOutgoing < XapBscMessage
+	attr_accessor :state, :level, :text, :display_text
 
-	# Initializes an xAP BSC event message with the given source address
-	# and UID.  Any subsequent arguments are ignored.
-	def initialize src_addr, src_uid, *args
+	# Initializes an xAP BSC event or info message with the given source
+	# address and UID.  If is_input is truthy, this will be an input.state
+	# message; if is_input is falsy, this will be an output.state message.
+	# Any subsequent arguments are ignored.
+	def initialize src_addr, src_uid, is_input, *args
+		puts "XapBscOutgoing initialize"
 		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
 			super src_addr, src_uid, nil, nil
+
+			@is_input = @blocks.keys[0].downcase.start_with? 'input'
+			@blocks[blockname] ||= @blocks.values[0] || {}
+
+			# TODO: Extract block/state/level/text/etc. processing
+			# code for use by all XapBsc* classes
+			@blocks.values[0].clone.each do |k, v|
+				case k.downcase
+				when 'state'
+					set_state v
+				when 'level'
+					set_level v
+				when 'text'
+					self.text = v
+				when 'displaytext'
+					self.display_text = v
+				end
+
+				# TODO: ID/subID
+			end
 		else
 			super 'xAPBSC.event', src_addr, src_uid, nil
+			@is_input = !!is_input
 		end
 	end
+
+	# Sets the State field in the message's (input|output).status block.
+	# Once the state is set, it cannot be unset, only changed.  Pass true
+	# for 'ON', false for 'OFF', nil for '?'.
+	def state= s
+		@blocks[blockname]['State'] = case s
+					      when true
+						      'ON'
+					      when false
+						      'OFF'
+					      when nil
+						      '?'
+					      end
+		@state = s
+	end
+
+	# Sets the Level field in the message's (input|output).status block.
+	# Once the level is set, it cannot be unset, only changed.  Examples:
+	# pass [ 1, 5 ] to specify '1/5'.  Pass [ 35, '%' ] to specify '35%'.
+	def level= num_denom_array
+		raise 'num_denom_array must be an Array' unless num_denom_array.is_a? Array
+		numerator, denominator = num_denom_array
+		@level = [ numerator, denominator ]
+		if denominator == '%'
+			@blocks[blockname]['Level'] = "#{numerator.to_i}%"
+		else
+			@blocks[blockname]['Level'] = "#{numerator.to_i}/#{denominator.to_i}"
+		end
+	end
+
+	# Sets the Text field in the message's (input|output).status block.
+	# Once the text is set, it cannot be unset, only changed.
+	def text= t
+		raise 'Text must not include newlines' if t.include? "\n"
+		@text = t
+		@blocks[blockname]['Text'] = t
+	end
+
+	# Sets the Text field in the message's (input|output).status block.
+	# Once the text is set, it cannot be unset, only changed.
+	def display_text= t
+		raise 'Display text must not include newlines' if t.include? "\n"
+		@display_text = t
+		@blocks[blockname]['DisplayText'] = t
+	end
+
+	protected
+	# Returns 'input.state' for input messages, 'output.state' for output messages
+	def blockname
+		@is_input ? 'input.state' : 'output.state'
+	end
+
+	# Sets state based on the state text: "ON", "OFF", or "?"
+	def set_state s
+		case s.upcase
+		when 'ON'
+			self.state = true
+		when 'OFF'
+			self.state = false
+		when '?'
+			self.state = nil
+		else
+			# Don't set state for anything else
+		end
+	end
+
+	# Sets level based on the level text: "x%", "y/z"
+	def set_level l
+		if l.include? '/'
+			self.level = l.split('/').map { |v| v.to_i }
+		elsif l.end_with? '%'
+			self.level = [ l.to_i, '%' ]
+		else
+			raise "Invalid format for level: #{l}"
+		end
+	end
+end
+
+class XapBscEvent < XapBscOutgoing
+	register_class self, 'xAPBSC.event'
 end
 
 # The xAP standard seems kind of silly for having separate info and event
@@ -90,16 +194,6 @@ end
 # xAP protocol is excessively chatty.  But, it seems a lot of DIY home
 # automation systems support it, so it's best to use the weak protocol you have
 # rather than the perfect one you don't.
-class XapBscInfo < XapBscMessage
+class XapBscInfo < XapBscOutgoing
 	register_class self, 'xAPBSC.info'
-
-	# Initializes an xAP BSC info message with the given source address and
-	# UID.  Any subsequent arguments are ignored.
-	def initialize src_addr, src_uid, *args
-		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
-			super src_addr, src_uid, nil, nil
-		else
-			super 'xAPBSC.event', src_addr, src_uid, nil
-		end
-	end
 end
