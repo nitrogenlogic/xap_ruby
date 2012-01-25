@@ -247,7 +247,10 @@ class XapMessage
 	end
 
 	# Adds the given hash as a block under the given name (TODO: hexadecimal fields)
-	# FIXME: can multiple blocks have the same name in xAP?
+	# FIXME: multiple blocks can have the same name in xAP according to
+	# http://www.xapautomation.org/index.php?title=Protocol_definition#Message_Grammar
+	# so the blocks hash and to_hash in the parser need to be replaced with
+	# arrays.
 	def add_block name, hash
 		@blocks ||= {}
 		@blocks[name] = hash
