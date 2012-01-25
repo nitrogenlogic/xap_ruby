@@ -40,7 +40,7 @@ class XapAddress
 		# software that ignores the UID rules entirely and uses the >
 		# wildcard character in the middle of an address
 		# http://www.erspearson.com/xAP/Slim/Manual.html#id616380
-		tokens = addr.split ':', 2
+		tokens = addr.strip.split ':', 2
 		addr = tokens[0].split '.', 3
 		subaddr = tokens[1]
 
