@@ -186,6 +186,7 @@ class XapMessage
 		@hop = 1
 		@uid = src_uid
 		@msgclass = msgclass
+		@blocks = {}
 	end
 
 	# Returns a string representation of the message suitable for
