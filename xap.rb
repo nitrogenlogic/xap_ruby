@@ -42,11 +42,7 @@ class XapAddress
 		# http://www.erspearson.com/xAP/Slim/Manual.html#id616380
 		tokens = addr.split ':', 2
 		addr = tokens[0].split '.', 3
-		subaddr = tokens[2]
-		if tokens[1]
-			subaddr ||= ''
-			subaddr << tokens[1]
-		end
+		subaddr = tokens[1]
 
 		self.new addr[0], addr[1], addr[2], subaddr
 	end
