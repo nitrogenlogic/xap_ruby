@@ -39,9 +39,9 @@ class XapBscBlock
 		end
 	end
 
-	# Sets the State field in the message's (input|output).status block.
-	# Once the state is set, it cannot be unset, only changed.  Pass true
-	# for 'ON', false for 'OFF', nil or any other value for '?'.
+	# Sets this block's State field.  Once the state is set, it cannot be
+	# unset, only changed.  Pass true for 'ON', false for 'OFF', nil or any
+	# other value for '?'.
 	def state= s
 		@state = s
 		@hash['State'] = case s
@@ -55,11 +55,11 @@ class XapBscBlock
 				 end
 	end
 
-	# Sets the Level field in the message's (input|output).status block.
-	# Once the level is set, it cannot be unset, only changed.  Examples:
-	# pass [ 1, 5 ] to specify '1/5'.  Pass [ 35, '%' ] to specify '35%'.
+	# Sets this block's Level field.  Once the level is set, it cannot be
+	# unset, only changed.  Examples: pass [ 1, 5 ] to specify '1/5'.  Pass
+	# [ 35, '%' ] to specify '35%'.
 	def level= num_denom_array
-		raise 'num_denom_array must be an Array' unless num_denom_array.is_a? Array
+		raise 'num_denom_array must be an Array.' unless num_denom_array.is_a? Array
 		numerator, denominator = num_denom_array
 		@level = [ numerator, denominator ]
 		if denominator == '%'
@@ -69,19 +69,18 @@ class XapBscBlock
 		end
 	end
 
-	# Sets the Text field in the message's (input|output).status block.
-	# Once the text is set, it cannot be unset, only changed.
+	# Sets this block's Text field.  Once the text is set, it cannot be
+	# unset, only changed.
 	def text= t
-		raise 'Text must not include newlines' if t.include? "\n"
+		raise 'Text must not include newlines.' if t.include? "\n"
 		@text = t
 		@hash['Text'] = t
 	end
 
-	# Sets the DisplayText field in the message's (input|output).status
-	# block.  Once the display text is set, it cannot be unset, only
-	# changed.
+	# Sets this block's DisplayText field.  Once the display text is set,
+	# it cannot be unset, only changed.
 	def display_text= t
-		raise 'Display text must not include newlines' if t.include? "\n"
+		raise 'Display text must not include newlines.' if t.include? "\n"
 		@display_text = t
 		@hash['DisplayText'] = t
 	end
@@ -269,6 +268,7 @@ class XapBscQuery < XapBscMessage
 	end
 end
 
+# Shared functionality between info and event messages.
 class XapBscResponse < XapBscMessage
 	attr_accessor :state, :level, :text, :display_text
 
