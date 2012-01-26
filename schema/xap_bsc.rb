@@ -8,7 +8,7 @@ path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, '..', 'xap.rb')
 
 class XapBscBlock
-	attr_accessor :state, :level, :text, :display_text
+	attr_accessor :state, :level, :text, :display_text, :id
 
 	# is_input - Whether this is an input block or an output block
 	# index - If not nil, the block's index (0-based)
@@ -33,6 +33,9 @@ class XapBscBlock
 			when 'displaytext'
 				@hash.delete k
 				self.display_text = v
+			when 'id'
+				@hash.delete k
+				self.id = v.upcase
 			end
 
 			# TODO: ID/subID
@@ -85,6 +88,15 @@ class XapBscBlock
 		@hash['DisplayText'] = t
 	end
 
+	# Sets this block's ID field.  The given ID must be a String containing
+	# either two uppercase hex digits or a single asterisk.  Once the ID is
+	# set, it cannot be unset, only changed.
+	def id= i
+		raise 'ID must be two uppercase hex digits or *.' unless i =~ /^([0-9A-Z][0-9A-Z]|\*)$/
+		@id = i
+		@hash['ID'] = i
+	end
+
 	# Returns 'input.state(.nn)' for input messages, 'output.state(.nn)' for output messages
 	def blockname
 		s = @is_input ? 'input.state' : 'output.state'
@@ -94,7 +106,7 @@ class XapBscBlock
 
 	# Returns a human-readable string description of this block.
 	def to_s
-		"Name: #{blockname} State: #{state} Level: #{level} Text: #{text} DisplayText: #{display_text}"
+		"Name: #{blockname} ID: #{id} State: #{state} Level: #{level} Text: #{text} DisplayText: #{display_text}"
 	end
 
 	protected
@@ -161,6 +173,13 @@ class XapBscMessage < XapUnsupportedMessage
 		end
 		s << "Regenerated message:\n"
 		s << super
+	end
+
+	# Yields each XapBscBlock in sequence.
+	def each_block &block
+		@bsc_blocks.each do |b|
+			yield b
+		end
 	end
 end
 
@@ -239,6 +258,21 @@ class XapBscCommand < XapBscMessage
 	def set_display_text index, value
 		check_block index
 		@bsc_blocks[index].display_text = value
+	end
+
+	# Gets the ID value of the index-th block (0-based).  Throws an error
+	# if index is out of range.
+	def get_id index
+		@bsc_blocks[index].id
+	end
+
+	# Sets the ID value of the index-th block (0-based).  The ID given must
+	# be either two uppercase hex digits or a single asterisk.  The block
+	# will be created if it is not present.  It is up to the caller to
+	# avoid creating gaps in the block indexes.
+	def set_id index, value
+		check_block index
+		@bsc_blocks[index].id = value
 	end
 
 	private
