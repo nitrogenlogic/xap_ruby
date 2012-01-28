@@ -19,13 +19,17 @@ class XapDevice
 	# interval - the number of seconds between xAP heartbeats sent by this
 	# device model when added to an XapHandler event loop.
 	def initialize address, uid, interval
+		raise 'Heartbeat interval must be a Fixnum or nil' if interval && !interval.is_a?(Fixnum)
 		set_address address
 		set_uid uid
 		@interval = interval
 	end
 
 	# Sets the XapHandler that manages messages to and from this device.
-	# This should typically be called by XapHandler itself.
+	# This should typically be called by XapHandler itself.  Subclasses may
+	# override this method in order to send messages that are supposed to
+	# be sent on initialization, so long as they call this base
+	# implementation first.
 	def handler= handler
 		raise 'handler must be a XapHandler' unless handler.is_a? XapHandler
 		@handler = handler
