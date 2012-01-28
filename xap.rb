@@ -115,6 +115,11 @@ class XapAddress
 	def to_s
 		@str
 	end
+
+	# Whether this address is a wildcard address.
+	def wildcard?
+		@wildcard
+	end
 end
 
 require File.join(path, 'xap_msg.rb')
