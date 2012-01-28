@@ -29,28 +29,26 @@ class XapHandler < EM::Connection
 		@timers = {}
 	end
 
-	def post_init
-		puts 'post_init'
-	end
-
 	def unbind
-		puts 'unbind'
 		@@instance = nil if @@instance == self
 	end
 
 	def receive_data d
 		begin
-			puts "receive_data(#{d.length}): #{ParseXap.parse(d).to_hash}"
 			msg = XapMessage.parse(d)
-			puts "Message: #{msg.class.name}\n\t#{msg.to_s.lines.to_a.join("\t")}"
-
-			@devices.each do |d|
-				# TODO: UID matching?
-				d.receive_message msg if msg.target_addr =~ d.address
-			end
+			puts "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})"
 		rescue Exception => e
 			puts "Error parsing incoming message: #{e}\n\t#{e.backtrace.join("\n\t")}"
 			puts "receive_data(#{d.length}) invalid: #{d.inspect}"
+			return
+		end
+
+		@devices.each do |d|
+			begin
+				d.receive_message msg if msg.target_addr =~ d.address
+			rescue RuntimeError => e
+				puts "Error processing message with device #{d}: #{e}\n\t#{e.backtrace.join("\n\t")}"
+			end
 		end
 	end
 

@@ -85,8 +85,6 @@ class XapAddress
 			@regex = @regex.gsub />$/, '.*'
 		end
 		@regex = Regexp.new "^#{@regex}$", Regexp::IGNORECASE
-
-		puts "XXX: Regex #{@regex}, wildcarded: #{@wildcard}"
 	end
 
 	# Returns true if all fields are == when converted to lowercase

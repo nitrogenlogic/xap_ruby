@@ -138,13 +138,10 @@ end
 
 class XapBscMessage < XapUnsupportedMessage
 	def self.parse msg, hash
-		puts "Basic Status and Control"
 		self.new msg, hash, nil, nil, nil
 	end
 
 	def initialize msgclass, src_addr, src_uid, target_addr, is_input
-		puts 'XapBscMessage initialize' # XXX
-
 		super msgclass, src_addr, src_uid, target_addr
 
 		if msgclass.is_a?(Treetop::Runtime::SyntaxNode) && src_addr.is_a?(Hash)
@@ -311,7 +308,6 @@ class XapBscResponse < XapBscMessage
 	# message; if is_input is falsy, this will be an output.state message.
 	# Any subsequent arguments are ignored.
 	def initialize src_addr, src_uid, is_input, *args
-		puts "XapBscResponse initialize"
 		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
 			super src_addr, src_uid, nil, nil, nil
 		else

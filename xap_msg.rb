@@ -155,7 +155,6 @@ class XapUnsupportedMessage < XapMessage
 	XapMessage.register_class self, nil
 
 	def self.parse msg, hash
-		puts "Fallback"
 		self.new msg, hash, nil
 	end
 
@@ -180,7 +179,6 @@ class XapHeartbeat < XapMessage
 	attr_accessor :interval
 
 	def self.parse msg, hash
-		puts "Heartbeat"
 		self.new msg, hash
 	end
 
