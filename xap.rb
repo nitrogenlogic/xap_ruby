@@ -92,10 +92,7 @@ class XapAddress
 	# Returns true if all fields are == when converted to lowercase
 	def == other
 		if other.is_a? XapAddress
-			other.vendor.downcase == @vendor.downcase &&
-				other.product.downcase == @product.downcase &&
-				other.instance.downcase == @instance.downcase &&
-				other.endpoint.downcase == @endpoint.downcase
+			other.to_s.downcase == to_s.downcase
 		else
 			false
 		end
