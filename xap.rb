@@ -74,7 +74,7 @@ class XapAddress
 		@str << ":#{@endpoint}" if @endpoint
 
 		# Build a regex for matching wildcarded addresses
-		raise "Address #{@str} contains * in the middle of a word" if @str =~ /([^.]\*)|(\*[^.])/
+		raise "Address #{@str} contains * in the middle of a word" if @str =~ /([^.:]\*)|(\*[^.:])/
 		raise "Address #{@str} contains > not at the end of a section" if @str =~ />(?!\:|$)/
 
 		@regex = @str.gsub '.', '\\.'
