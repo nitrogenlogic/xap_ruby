@@ -167,10 +167,10 @@ class XapBscMessage < XapUnsupportedMessage
 		s = "XapBscMessage: #{@bsc_blocks.length} blocks recognized, #{@blocks.length} total\n"
 		s << "Blocks: \n"
 		@bsc_blocks.each do |blk|
-			s << "#{blk.inspect}\n"
+			s << "\t#{blk.inspect}\n"
 		end
-		s << "Regenerated message:\n"
-		s << super
+		s << "Regenerated message:\n\t"
+		s << super.lines.to_a.join("\t")
 	end
 
 	# Yields each XapBscBlock in sequence.
