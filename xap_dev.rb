@@ -34,7 +34,7 @@ class XapDevice
 	# Called whenever a matching message is received by the associated
 	# handler.
 	def receive_message msg
-		puts "XXX: You forgot to override receive_message in #{self.class.name}: #{msg}"
+		puts "XXX: You forgot to override receive_message in #{self.class.name}: #{msg.inspect.lines.to_a.join("\t")}"
 	end
 
 	protected

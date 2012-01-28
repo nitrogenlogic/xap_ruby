@@ -105,7 +105,7 @@ class XapBscBlock
 	end
 
 	# Returns a human-readable string description of this block.
-	def to_s
+	def inspect
 		"Name: #{blockname} ID: #{id} State: #{state} Level: #{level} Text: #{text} DisplayText: #{display_text}"
 	end
 
@@ -162,11 +162,12 @@ class XapBscMessage < XapUnsupportedMessage
 		end
 	end
 
-	def to_s
+	# Returns a human-readable string description of this message.
+	def inspect
 		s = "XapBscMessage: #{@bsc_blocks.length} blocks recognized, #{@blocks.length} total\n"
 		s << "Blocks: \n"
 		@bsc_blocks.each do |blk|
-			s << "#{blk}\n"
+			s << "#{blk.inspect}\n"
 		end
 		s << "Regenerated message:\n"
 		s << super
