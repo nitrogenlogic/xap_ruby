@@ -164,7 +164,7 @@ class XapBscMessage < XapUnsupportedMessage
 
 	# Returns a human-readable string description of this message.
 	def inspect
-		s = "XapBscMessage: #{@bsc_blocks.length} blocks recognized, #{@blocks.length} total\n"
+		s = "#{self.class.name}: #{@bsc_blocks.length} blocks recognized, #{@blocks.length} total\n"
 		s << "Blocks: \n"
 		@bsc_blocks.each do |blk|
 			s << "\t#{blk.inspect}\n"
