@@ -24,17 +24,17 @@ class XapDevice
 		@interval = interval
 	end
 
+	# Sets the XapHandler that manages messages to and from this device.
+	# This should typically be called by XapHandler itself.
+	def handler= handler
+		raise 'handler must be a XapHandler' unless handler.is_a? XapHandler
+		@handler = handler
+	end
+
 	# Called whenever a matching message is received by the associated
 	# handler.
 	def receive_message msg
 		puts "XXX: You forgot to override receive_message in #{self.class.name}: #{msg}"
-	end
-
-	# Sets the XapHandler that manages messages to and from this device.
-	# This should typically be called by XapHandler itself.
-	def set_handler handler
-		raise 'handler must be a XapHandler' unless handler.is_a? XapHandler
-		@handler = handler
 	end
 
 	protected
