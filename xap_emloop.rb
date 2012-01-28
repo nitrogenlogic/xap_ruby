@@ -43,11 +43,13 @@ class XapHandler < EM::Connection
 			return
 		end
 
-		@devices.each do |d|
-			begin
-				d.receive_message msg if msg.target_addr =~ d.address
-			rescue RuntimeError => e
-				puts "Error processing message with device #{d}: #{e}\n\t#{e.backtrace.join("\n\t")}"
+		if msg.target_addr
+			@devices.each do |d|
+				begin
+					d.receive_message msg if msg.target_addr.base =~ d.address
+				rescue RuntimeError => e
+					puts "Error processing message with device #{d}: #{e}\n\t#{e.backtrace.join("\n\t")}"
+				end
 			end
 		end
 	end

@@ -52,8 +52,7 @@ class XapDevice
 		if !address.is_a?(XapAddress) || address.wildcard? || address.endpoint
 			raise 'address must be a non-wildcarded XapAddress without ":"'
 		end
-
-		@address = XapAddress.new address.vendor, address.product, address.instance, '>'
+		@address = address
 	end
 
 	# Changes the UID used by this device.  Subclasses should call this if

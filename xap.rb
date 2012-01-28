@@ -105,6 +105,12 @@ class XapAddress
 	end
 	alias_method :match, :'=~'
 
+	# Returns an XapAddress that contains the base of this address with no
+	# endpoint.  Wildcards in the base address components are preserved.
+	def base
+		XapAddress.new @vendor, @product, @instance
+	end
+
 	# Returns a correctly-formatted string representation of the address,
 	# suitable for inclusion in an xAP message.
 	def to_s
