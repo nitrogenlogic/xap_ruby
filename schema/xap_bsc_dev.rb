@@ -5,6 +5,8 @@ path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, '..', 'xap.rb')
 require File.join(path, 'xap_bsc.rb')
 
+# Represents an xAP BSC Device.  See the xAP Basic Status and Control Schema.
+# http://www.xapautomation.org/index.php?title=Basic_Status_and_Control_Schema
 class XapBscDevice < XapDevice
 	# Initializes an XapBscDevice with the given address, uid.  Endpoints
 	# is an array of hashes containing :State, :Level, :Text, and/or
@@ -41,7 +43,10 @@ class XapBscDevice < XapDevice
 	def initialize address, uid, endpoints, interval = 5
 		super address, uid, interval
 
-		# TODO: Make endpoints a hash, with what is currently the :endpoint field as the hash key
+		# TODO: Make endpoints a hash, with what is currently the
+		# :endpoint field as the hash key, then store the hash key back
+		# into the hash (will simplify calls to XapBscDevice.new, so
+		# the user can type => instead of :endpoint)
 
 		@input_count = 0
 		@output_count = 0
