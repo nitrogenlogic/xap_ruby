@@ -112,31 +112,97 @@ class XapBscDevice < XapDevice
 	# TODO: Ability to add and remove endpoints, with appropriate notice
 	# sent to the xAP network
 
-	# Gets the State field, if any, of the endpoint with the given name.
+	# Returns the State field of the endpoint with the given name.
 	def get_state endpoint
+		@endpoints[endpoint.downcase][:State]
 	end
 
+	# Sets the State field of the endpoint with the given name.  If the new
+	# state is different fron the old state, an event message will be
+	# generated.  Otherwise, an info message will be generated.
 	def set_state endpoint, state
+		raise 'state must be true, false, or nil.' unless state == true || state == false || state == nil
+
+		ep = @endpoints[endpoint.downcase]
+		old = ep[:State]
+		ep[:State] = state
+
+		if state != old
+			send_event ep
+		else
+			send_info ep
+		end
 	end
 
+	# Returns the Level field of the endpoint with the given name.
 	def get_level endpoint
+		@endpoints[endpoint.downcase][:Level]
 	end
 
-	def set_level endpoint, state
+	# Sets the Level field of the endpoint with the given name.  If level
+	# is an array, then both the numerator and denominator are replaced.
+	# If level is a Fixnum, only the numerator is replaced.  If the new
+	# level is different from the old level, an event message will be
+	# generated.  Otherwise, an info message will be generated.  Error
+	# checking is not performed on the level parameter.
+	def set_level endpoint, level
+		ep = @endpoints[endpoint.downcase]
+
+		level = [ level, ep[:Level][1] ] if level.is_a? Fixnum
+		old = ep[:Level]
+		ep[:Level] = level
+
+		if level != old
+			send_event ep
+		else
+			send_info ep
+		end
 	end
 
+	# Returns the Text field of the endpoint with the given name.
 	def get_text endpoint
+		@endpoints[endpoint.downcase][:Text]
 	end
 
-	def set_text endpoint, state
+	# Sets the Text field of the endpoint with the given name.  If the new
+	# state is different fron the old state, an event message will be
+	# generated.  Otherwise, an info message will be generated.
+	def set_text endpoint, text
+		ep = @endpoints[endpoint.downcase]
+
+		old = ep[:Text]
+		ep[:Text] = old
+
+		if text != old
+			send_event ep
+		else
+			send_info ep
+		end
 	end
 
+	# Returns the DisplayText field of the endpoint with the given name.
 	def get_display_text endpoint
+		@endpoints[endpoint.downcase][:DisplayText]
 	end
 
-	def set_display_text endpoint, state
+	# Sets the DisplayText field of the endpoint with the given name.  If
+	# the new state is different fron the old state, an event message will
+	# be generated.  Otherwise, an info message will be generated.
+	def set_display_text endpoint, text
+		ep = @endpoints[endpoint.downcase]
+
+		old = ep[:DisplayText]
+		ep[:DisplayText] = old
+
+		if text != old
+			send_event ep
+		else
+			send_info ep
+		end
 	end
 
+	# FIXME: If multiple fields need to change at once, don't send
+	# info/event messages until after all the fields are changed.
 	private
 	# Send an xAPBSC.info message for the given endpoint hash.
 	def send_info ep
