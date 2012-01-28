@@ -330,9 +330,11 @@ class XapBscResponse < XapBscMessage
 	end
 
 	# Sets the Level field in the message's (input|output).status block.
-	# Once the level is set, it cannot be unset, only changed.  Examples:
-	# pass [ 1, 5 ] to specify '1/5'.  Pass [ 35, '%' ] to specify '35%'.
+	# Once the level is set, it cannot be unset, only changed.  xAPBSC.info
+	# and xAPBSC.event messages should not use percentage responses.
+	# Example: pass [ 1, 5 ] to specify '1/5'.
 	def level= num_denom_array
+		raise 'Do not use percentages for response messages.' if num_denom_array[1] == '%'
 		@bsc_blocks[0].level = num_denom_array
 	end
 
