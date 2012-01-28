@@ -8,7 +8,7 @@ require 'logic_system'
 path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, 'xap.rb')
 require File.join(path, 'schema/xap_bsc.rb')
-require File.join(path, 'parser/parse_xap.rb')
+require File.join(path, 'schema/xap_bsc_dev.rb')
 
 XAP_PORT=3639
 BCAST_ADDR='255.255.255.255'
@@ -31,12 +31,16 @@ class XapHandler < EM::Connection
 
 	def unbind
 		@@instance = nil if @@instance == self
+
+		@devices.each do |d|
+			d.handler = nil
+		end
 	end
 
 	def receive_data d
+		handled = false
 		begin
 			msg = XapMessage.parse(d)
-			puts "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})"
 		rescue Exception => e
 			puts "Error parsing incoming message: #{e}\n\t#{e.backtrace.join("\n\t")}"
 			puts "receive_data(#{d.length}) invalid: #{d.inspect}"
@@ -46,11 +50,18 @@ class XapHandler < EM::Connection
 		if msg.target_addr
 			@devices.each do |d|
 				begin
-					d.receive_message msg if msg.target_addr.base =~ d.address
+					if msg.target_addr.base =~ d.address
+						d.receive_message msg
+						handled = true
+					end
 				rescue RuntimeError => e
 					puts "Error processing message with device #{d}: #{e}\n\t#{e.backtrace.join("\n\t")}"
 				end
 			end
+		end
+
+		unless handled
+			puts "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})"
 		end
 	end
 
@@ -79,6 +90,7 @@ class XapHandler < EM::Connection
 		@devices.delete device
 		timer = @timers.delete device
 		timer.cancel if timer
+		device.handler = nil
 	end
 
 	# Sends an XapMessage to the network.
@@ -130,9 +142,13 @@ if __FILE__ == $0
 		# EventMachine doesn't seem to support using '::' for IP address
 		EM.open_datagram_socket '0.0.0.0', XAP_PORT, XapHandler, "xAP IPv4"
 
-		XapHandler.instance.add_device(
-			XapDevice.new(XapAddress.parse('ACME.Lighting.apartment'), Xap.random_uid, 10)
-		)
+		# TODO: Add a function in xap.rb to add a device to the event handler instance
+		bscdev = XapBscDevice.new(XapAddress.parse('ACME.Lighting.apartment'), Xap.random_uid, [
+			       { :endpoint => 'Input 1', :uid => 1, :State => false },
+			       { :endpoint => 'Output 1', :uid => 2, :State => true, :callback => proc { |ep| puts 'Output 1' } }
+		])
+
+		XapHandler.instance.add_device bscdev
 
 		# TODO: xAP hub support
 	}
