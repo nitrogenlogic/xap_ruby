@@ -119,5 +119,15 @@ class XapAddress
 	end
 end
 
+# Basic functions for working with the xAP protocol.
+module Xap
+	# Generates a random xAP UID of the form 'FF(01..FE)(01..FE)00'.
+	def self.random_uid
+		a = Random.rand(253) + 1
+		b = Random.rand(253) + 1
+		sprintf "FF%02X%02X00", a, b
+	end
+end
+
 require File.join(path, 'xap_msg.rb')
 require File.join(path, 'xap_dev.rb')
