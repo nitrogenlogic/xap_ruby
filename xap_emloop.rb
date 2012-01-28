@@ -67,8 +67,6 @@ class XapHandler < EM::Connection
 	# interval=[interval]
 	# }
 	def send_heartbeat src_addr, src_uid, interval = 60
-		# TODO: Use a generic compose_block or compose_xap facility to
-		# build messages?
 		msg = "xap-hbeat\n" +
 			"{\n" +
 			"v=12\n" +
