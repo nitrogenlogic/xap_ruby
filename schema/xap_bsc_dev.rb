@@ -118,7 +118,7 @@ class XapBscDevice < XapDevice
 	end
 
 	# Sets the State field of the endpoint with the given name.  If the new
-	# state is different fron the old state, an event message will be
+	# state is different from the old state, an event message will be
 	# generated.  Otherwise, an info message will be generated.
 	def set_state endpoint, state
 		raise 'state must be true, false, or nil.' unless state == true || state == false || state == nil
@@ -165,7 +165,7 @@ class XapBscDevice < XapDevice
 	end
 
 	# Sets the Text field of the endpoint with the given name.  If the new
-	# state is different fron the old state, an event message will be
+	# state is different from the old state, an event message will be
 	# generated.  Otherwise, an info message will be generated.
 	def set_text endpoint, text
 		ep = @endpoints[endpoint.downcase]
@@ -186,7 +186,7 @@ class XapBscDevice < XapDevice
 	end
 
 	# Sets the DisplayText field of the endpoint with the given name.  If
-	# the new state is different fron the old state, an event message will
+	# the new state is different from the old state, an event message will
 	# be generated.  Otherwise, an info message will be generated.
 	def set_display_text endpoint, text
 		ep = @endpoints[endpoint.downcase]
