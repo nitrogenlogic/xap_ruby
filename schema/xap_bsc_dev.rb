@@ -85,7 +85,7 @@ class XapBscDevice < XapDevice
 	def receive_message msg
 		#puts "TODO: Finish receive_message in #{self}: #{msg.inspect.lines.to_a.join("\t")}"
 
-		# TODO: Add support for endpoint-only wildcard matching to XapAddress
+		# TODO: Use recently-added support for endpoint-only wildcard matching in XapAddress
 
 		if msg.is_a? XapBscCommand
 			puts "Command message for #{self}"

@@ -77,14 +77,13 @@ class XapAddress
 		raise "Address #{@str} contains * in the middle of a word" if @str =~ /([^.:]\*)|(\*[^.:])/
 		raise "Address #{@str} contains > not at the end of a section" if @str =~ />(?!\:|$)/
 
-		@regex = @str.gsub '.', '\\.'
-		@wildcard = !!(@str =~ /[*>]/)
-		if @wildcard
-			@regex = @regex.gsub /(?<=\\\.|^)\*(?=\\\.|$)/, '\\1[^.:]*'
-			@regex = @regex.gsub />:/, '[^:]*:'
-			@regex = @regex.gsub />$/, '.*'
+		@regex = build_regex @str
+		@baseregex = build_regex "#{@vendor}.#{@product}.#{@instance}"
+		if @endpoint
+			@epregex = build_regex @endpoint
+		else
+			@epregex = /^$/
 		end
-		@regex = Regexp.new "^#{@regex}$", Regexp::IGNORECASE
 	end
 
 	# Returns true if all fields are == when converted to lowercase
@@ -111,6 +110,21 @@ class XapAddress
 		XapAddress.new @vendor, @product, @instance
 	end
 
+	# Returns true if this address's base components (i.e. everything
+	# before the colon) match the base components of the given other
+	# address.  If matching a wildcarded address, call this on the
+	# wildcarded address (e.g. wild.base_match(other) rather than
+	# other.base_match(wild).
+	def base_match other
+		other.base.to_s =~ @baseregex
+	end
+
+	# Returns true if this address's endpoint matches the endpoint of the
+	# given other address.
+	def endpoint_match other
+		other.endpoint =~ @epregex
+	end
+
 	# Returns a correctly-formatted string representation of the address,
 	# suitable for inclusion in an xAP message.
 	def to_s
@@ -120,6 +134,19 @@ class XapAddress
 	# Whether this address is a wildcard address.
 	def wildcard?
 		@wildcard
+	end
+
+	private
+	# Builds a regular expression for a wildcarded xAP string
+	def build_regex str
+		regex = str.gsub '.', '\\.'
+		wildcard = !!(str =~ /[*>]/)
+		if wildcard
+			regex = regex.gsub /(?<=\\\.|^)\*(?=\\\.|$)/, '\\1[^.:]*'
+			regex = regex.gsub />:/, '[^:]*:'
+			regex = regex.gsub />$/, '.*'
+		end
+		Regexp.new "^#{regex}$", Regexp::IGNORECASE
 	end
 end
 
