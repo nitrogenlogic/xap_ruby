@@ -115,6 +115,12 @@ class XapAddress
 		XapAddress.new @vendor, @product, @instance
 	end
 
+	# Returns a new XapAddress that contains this address's base components
+	# with the given endpoint.
+	def for_endpoint ep_name
+		XapAddress.new @vendor, @product, @instance, ep_name
+	end
+
 	# Returns true if this address's base components (i.e. everything
 	# before the colon) match the base components of the given other
 	# address.  If matching a wildcarded address, call this on the

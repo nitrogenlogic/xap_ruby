@@ -37,14 +37,12 @@ class XapBscBlock
 				@hash.delete k
 				self.id = v.upcase
 			end
-
-			# TODO: ID/subID
 		end
 	end
 
 	# Sets this block's State field.  Once the state is set, it cannot be
-	# unset, only changed.  Pass true for 'ON', false for 'OFF', nil or any
-	# other value for '?'.
+	# unset, only changed.  Pass true for 'ON', false for 'OFF', 'toggle'
+	# for 'toggle', or nil or any other value for '?'.
 	def state= s
 		@state = s
 		@hash['State'] = case s
@@ -53,14 +51,20 @@ class XapBscBlock
 				 when false
 					 'OFF'
 				 else
-					 @state = '?'
-					 '?'
+					 if s.is_a?(String) && s.downcase == 'toggle'
+						 @state = 'toggle'
+						 'toggle'
+					 else
+						 @state = '?'
+						 '?'
+					 end
 				 end
 	end
 
 	# Sets this block's Level field.  Once the level is set, it cannot be
 	# unset, only changed.  Examples: pass [ 1, 5 ] to specify '1/5'.  Pass
-	# [ 35, '%' ] to specify '35%'.
+	# [ 35, '%' ] to specify '35%'.  Pass [ 25 ] to specify 25 in an
+	# endpoint's native range.
 	def level= num_denom_array
 		raise 'num_denom_array must be an Array.' unless num_denom_array.is_a? Array
 		numerator, denominator = num_denom_array
@@ -117,8 +121,10 @@ class XapBscBlock
 			self.state = true
 		when 'OFF'
 			self.state = false
+		when 'TOGGLE'
+			self.state = 'toggle'
 		when '?'
-			self.state = nil
+			self.state = '?'
 		else
 			# Don't set state for anything else
 		end
@@ -131,7 +137,7 @@ class XapBscBlock
 		elsif l.end_with? '%'
 			self.level = [ l.to_i, '%' ]
 		else
-			raise "Invalid format for level: #{l}"
+			self.level = [ l.to_i ]
 		end
 	end
 end
@@ -197,34 +203,38 @@ class XapBscCommand < XapBscMessage
 	end
 
 	# Gets the State value of the index-th block (0-based).  Returns true
-	# for 'ON', false for 'OFF', '?' for '?' or any other value, and nil
-	# for undefined.  Throws an error if index is out of range.
+	# for 'ON', false for 'OFF', 'toggle' for 'toggle', '?' for '?' or any
+	# other value, and nil for undefined.  Throws an error if index is out
+	# of range.
 	def get_state index
 		@bsc_blocks[index].state
 	end
 
 	# Sets the State value of the index-th block (0-based).  Pass true for
-	# 'ON', false for 'OFF', any other value for '?'.  The block will be
-	# created if it is not present.  It is up to the caller to avoid
-	# creating gaps in the block indexes.
+	# 'ON', false for 'OFF', 'toggle' for 'toggle', or any other value for
+	# '?'.  The block will be created if it is not present.  It is up to
+	# the caller to avoid creating gaps in the block indexes.
 	def set_state index, value
 		check_block index
 		@bsc_blocks[index].state = value
 	end
 
-	# Gets the Level value of the index-th block (0-based).  Returns a
-	# two-element array with the numerator and '%' if the message contains
-	# a percentage level, or the numerator and denominator if the message
-	# contains a ranged level.  Throws an error if index is out of range.
+	# Gets the Level value of the index-th block (0-based).  Returns an
+	# array with the numerator and '%' if the message contains a percentage
+	# level, the numerator and denominator if the message contains a ranged
+	# level, or just the numerator if the message contains a non-ranged
+	# level.  Throws an error if index is out of range.
 	def get_level index
 		@bsc_blocks[index].level
 	end
 
 	# Sets the Level value of the index-th block (0-based).  The value
-	# parameter must be a two-element array containing the numerator and
-	# '%' for a percentage level, or the numerator and the denominator for
-	# a ranged level.  The block will be created if it is not present.  It
-	# is up to the caller to avoid creating gaps in the block indexes.
+	# parameter must be an array containing the numerator and '%' for a
+	# percentage level, the numerator and the denominator for a ranged
+	# level, or the numerator alone for command messages that will set an
+	# endpoint's level using its native range.  The block will be created
+	# if it is not present.  It is up to the caller to avoid creating gaps
+	# in the block indexes.
 	def set_level index, value
 		check_block index
 		@bsc_blocks[index].level = value
@@ -324,17 +334,20 @@ class XapBscResponse < XapBscMessage
 
 	# Sets the State field in the message's (input|output).status block.
 	# Once the state is set, it cannot be unset, only changed.  Pass true
-	# for 'ON', false for 'OFF', nil for '?'.
+	# for 'ON', false for 'OFF', 'toggle' for 'toggle', or nil for '?'.
 	def state= s
+		raise 'Do not use State=toggle for response messages.' if s.is_a?(String) && s.casecmp('toggle') == 0
 		@bsc_blocks[0].state = s
 	end
 
 	# Sets the Level field in the message's (input|output).status block.
 	# Once the level is set, it cannot be unset, only changed.  xAPBSC.info
-	# and xAPBSC.event messages should not use percentage responses.
-	# Example: pass [ 1, 5 ] to specify '1/5'.
+	# and xAPBSC.event messages should not use percentage or non-ranged
+	# responses.  Example: pass [ 1, 5 ] to specify '1/5'.
 	def level= num_denom_array
-		raise 'Do not use percentages for response messages.' if num_denom_array[1] == '%'
+		if num_denom_array[1] == nil || num_denom_array[1] == '%'
+			raise 'Do not use percentages or non-ranged levels for response messages.'
+		end
 		@bsc_blocks[0].level = num_denom_array
 	end
 
@@ -352,7 +365,8 @@ class XapBscResponse < XapBscMessage
 	end
 
 	# Gets the message's State value.  Returns true for 'ON', false for
-	# 'OFF', '?' for '?' or any other value, and nil for undefined.
+	# 'OFF', 'toggle' for 'toggle', '?' for '?' or any other value, and nil
+	# for undefined.
 	def state
 		@bsc_blocks[0].state
 	end

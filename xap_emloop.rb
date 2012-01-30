@@ -61,7 +61,8 @@ class XapHandler < EM::Connection
 		end
 
 		unless handled
-			puts "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})"
+			puts "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})",
+				"\t#{msg.inspect.lines.to_a.join("\t")}"
 		end
 	end
 
@@ -145,7 +146,8 @@ if __FILE__ == $0
 		# TODO: Add a function in xap.rb to add a device to the event handler instance
 		bscdev = XapBscDevice.new(XapAddress.parse('ACME.Lighting.apartment'), Xap.random_uid, [
 			       { :endpoint => 'Input 1', :uid => 1, :State => false },
-			       { :endpoint => 'Output 1', :uid => 2, :State => true, :callback => proc { |ep| puts 'Output 1' } }
+			       { :endpoint => 'Output 1', :uid => 2, :State => true, :callback => proc { |ep| puts "Output 1 cb: #{ep}" } },
+			       { :endpoint => 'Output 2', :uid => 3, :State => false, :Level => [37, 924], :callback => proc { |ep| puts "Output 2 cb: #{ep}" } }
 		])
 
 		XapHandler.instance.add_device bscdev

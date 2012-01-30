@@ -252,7 +252,7 @@ class XapBscDevice < XapDevice
 		# Send info message for endpoint (TODO: Store an info
 		# message in the endpoint hash instead of continually
 		# creating new info messages?)
-		msg = XapBscInfo.new(address, uid_for(ep[:uid]), !ep.include?(:callback))
+		msg = XapBscInfo.new(address.for_endpoint(ep[:endpoint]), uid_for(ep[:uid]), !ep.include?(:callback))
 		msg.state = ep[:State] if ep.include? :State
 		msg.level = ep[:Level] if ep.include? :Level
 		msg.text = ep[:Text] if ep.include? :Text
@@ -268,7 +268,7 @@ class XapBscDevice < XapDevice
 		# Send event message for endpoint (TODO: Store an event
 		# message in the endpoint hash instead of continually
 		# creating new info messages?)
-		msg = XapBscEvent.new(address, uid_for(ep[:uid]), !ep.include?(:callback))
+		msg = XapBscEvent.new(address.for_endpoint(ep[:endpoint]), uid_for(ep[:uid]), !ep.include?(:callback))
 		msg.state = ep[:State] if ep.include? :State
 		msg.level = ep[:Level] if ep.include? :Level
 		msg.text = ep[:Text] if ep.include? :Text
@@ -284,9 +284,42 @@ class XapBscDevice < XapDevice
 
 	# Updates the given endpoint with values from the given XapBscBlock
 	def update_endpoint ep, block
-		puts "TODO: Updating endpoint #{ep} from #{block.inspect}"
-		# TODO: update ep with values from block, send info if no change was made
+		puts "XXX: Updating endpoint #{ep} from #{block.inspect}"
 
-		send_event ep
+		old = ep.clone
+		puts "\tBefore: #{old}"
+
+		if block.state != nil
+			case block.state
+			when true
+				ep[:State] = true
+			when false
+				ep[:State] = false
+			when 'toggle'
+				ep[:State] = !ep[:State]
+			end
+		end
+
+		if ep.include?(:Level) && block.level
+			case block.level[1]
+			when '%', Fixnum
+				div = block.level[1] == '%' ? 100 : block.level[1]
+				ep[:Level][0] = block.level[0] * ep[:Level][1] / div
+			when nil
+				ep[:Level][0] = block.level[0]
+			end
+		end
+
+		ep[:Text] = block.text if ep.include?(:Text) && block.text
+		ep[:DisplayText] = block.display_text if ep.include?(:DisplayText) && block.display_text
+
+		puts "\tAfter: #{ep}"
+
+		if ep != old
+			send_event ep
+			ep[:callback].call(ep)
+		else
+			send_info ep
+		end
 	end
 end
