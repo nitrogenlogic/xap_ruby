@@ -152,6 +152,14 @@ if __FILE__ == $0
 
 		XapHandler.instance.add_device bscdev
 
+		EM.add_timer(2) do
+			bscdev.add_endpoint({ :endpoint => 'Output 3', :State => false, :Level => [ 0, 30 ], :callback => proc {|e|} })
+		end
+
+		EM.add_timer(5) do
+			bscdev.remove_endpoint 'Output 1'
+		end
+
 		# TODO: xAP hub support
 	}
 end

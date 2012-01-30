@@ -14,30 +14,20 @@ class XapBscDevice < XapDevice
 	# :Level should be an array of [numerator, denominator], and :Text and
 	# :DisplayText should be Strings.  Each input and output block must
 	# also have an :endpoint key that contains the endpoint name for the
-	# given block and a :uid key that contains an integer from 1 to 255.
-	# Endpoint names and UIDs must be unique within this device.  TODO: If
-	# no :uid is specified, the UID will be assigned incrementally with
-	# inputs getting even numbers starting with 2, and outputs getting odd
-	# numbers starting with 1.  No check is made for collisions with
-	# manually-assigned :uid values.  Output hashes are identified by
-	# including a :callback key that is a proc to be called with the
-	# endpoint hash when any of the output endpoint's attributes are
-	# changed by an incoming xAP message.
+	# given block and may include a :uid key that contains an integer from
+	# 1 to 254.  Endpoint names and UIDs must be unique within this device.
+	# Output hashes (i.e. those endpoints that can be changed via xAP) are
+	# identified by including a :callback key that is a proc to be called
+	# with the endpoint hash when any of the output endpoint's attributes
+	# are changed by an incoming xAP message.
 	#
-	# Summary of endpoint fields:
-	# :endpoint - Name of endpoint - mandatory, must be unique when downcased, String
-	# :uid - UID of endpoint - mandatory, must be unique, integer 1-254
-	# :callback - Output change callback - mandatory for outputs, may be nil
-	# :State - On/off/? state - mandatory according to xAP BSC spec
-	# :Level - numerator / denominator - optional
-	# :Text - Stream text - optional (mutually exclusive with :Level according to xAP BSC spec)
-	# :DisplayText - UI display text - optional
+	# See add_endpoint for a summary of endpoint fields.
 	#
 	# Example:
 	#
 	# XapBscDevice.new XapAddress.new('vendor', 'dev', 'hostname'), Xap.random_uid,
 	# 	[
-	# 	{ :endpoint => 'Input 1', :State => true },
+	# 	{ :endpoint => 'Input 1', :uid => 1, :State => true },
 	# 	{ :endpoint => 'Output 1', :State => true, :callback => proc { |ep| puts 'Output 1' } }
 	# 	]
 	def initialize address, uid, endpoints, interval = 5
@@ -54,21 +44,7 @@ class XapBscDevice < XapDevice
 		@uids = []
 		@outputs = [] # Array containing only output endpoints to simplify handling command messages
 		endpoints.each do |ep|
-			unless ep.include?(:endpoint) && ep.include?(:State) && ep[:uid].is_a?(Fixnum)
-				raise 'An endpoint is missing required fields.'
-			end
-			raise 'Duplicate endpoint name.' if @endpoints.include? ep[:endpoint]
-			# TODO: Additional verification of :Level, :Text, and :DisplayText
-
-			if ep.include? :callback
-				@output_count = @output_count + 1
-				@outputs << ep
-			else
-				@input_count = @input_count + 1
-			end
-
-			@endpoints[ep[:endpoint].downcase] = ep
-			@uids[ep[:uid]] = ep
+			add_endpoint ep
 		end
 	end
 
@@ -84,10 +60,6 @@ class XapBscDevice < XapDevice
 
 	# Called when a message targeting this device's address is received.
 	def receive_message msg
-		#puts "TODO: Finish receive_message in #{self}: #{msg.inspect.lines.to_a.join("\t")}"
-
-		# TODO: Use recently-added support for endpoint-only wildcard matching in XapAddress
-
 		if msg.is_a? XapBscCommand
 			puts "Command message for #{self}"
 
@@ -142,15 +114,70 @@ class XapBscDevice < XapDevice
 		end
 	end
 
-	# TODO: Ability to add and remove endpoints, with appropriate notice
-	# sent to the xAP network
+	# Adds a new endpoint hash to the list of endpoints, generating an
+	# xAPBSC.info message if the addition is successful..  The endpoint's
+	# name must be unique.  UID collision will result in an exception being
+	# raised.  If the UID is not specified, the lowest available UID will
+	# be used.
+	#
+	# Summary of endpoint fields:
+	# :endpoint - Name of endpoint - mandatory, must be unique when downcased, String
+	# :uid - UID of endpoint - optional, must be unique, Fixnum 1-254
+	# :callback - Output change callback - mandatory for outputs, may be nil
+	# :State - On/off/? state - mandatory according to xAP BSC spec
+	# :Level - numerator / denominator - optional
+	# :Text - Stream text - optional (mutually exclusive with :Level according to xAP BSC spec)
+	# :DisplayText - UI display text - optional
+	#
+	# Example:
+	# add_endpoint { :endpoint => 'Input 1', :uid => 4, :State => false, :Level => [ 0, 30 ] }
+	def add_endpoint ep
+		unless ep.include?(:endpoint) && ep.include?(:State) && (!ep.include?(:uid) || ep[:uid].is_a?(Fixnum))
+			raise 'An endpoint is missing one or more required fields (:endpoint, :State).'
+		end
 
-	def add_endpoint ephash
-		# TODO: move code from initialize here, call add_endpoint in initialize
+		raise "Duplicate endpoint name #{ep[:endpoint]}." if @endpoints.include? ep[:endpoint].downcase
+
+		ep[:uid] ||= find_free_uid
+		raise "Duplicate UID #{ep[:uid]}." if @uids[ep[:uid]]
+
+		# TODO: Additional verification of :Level, :Text, and :DisplayText
+
+		if ep.include? :callback
+			@output_count = @output_count + 1
+			@outputs << ep
+		else
+			@input_count = @input_count + 1
+		end
+
+		@endpoints[ep[:endpoint].downcase] = ep
+		@uids[ep[:uid]] = ep
+
+		send_info ep if @handler
 	end
 
-	def remove_endpoint epname_or_hash
-		# TODO
+	# Removes the given endpoint, which may be the endpoint hash or name.
+	# Doesn't verify that the endpoint actually exists.
+	def remove_endpoint ep
+		if ep.is_a? String
+			ep = @endpoints[ep.downcase]
+		end
+		@endpoints.delete ep[:endpoint].downcase
+		@uids[ep[:uid]] = nil
+	end
+
+	# Returns the endpoint having the given UID, if any.
+	def uid_endpoint uid
+		@uids[uid]
+	end
+
+	# Finds and returns the lowest-available endpoint UID, or nil if there
+	# are no free endpoint IDs.
+	def find_free_uid
+		for idx in 1..254
+			return idx unless @uids[idx]
+		end
+		nil
 	end
 
 	# Returns the State field of the endpoint with the given name.
