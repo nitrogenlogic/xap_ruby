@@ -68,6 +68,7 @@ class XapBscDevice < XapDevice
 			end
 
 			@endpoints[ep[:endpoint].downcase] = ep
+			@uids[ep[:uid]] = ep
 		end
 	end
 
@@ -89,13 +90,44 @@ class XapBscDevice < XapDevice
 
 		if msg.is_a? XapBscCommand
 			puts "Command message for #{self}"
-			# TODO: Do nothing if output_count is 0, use exact match if msg.target_addr.wildcard? is false
+
+			if @output_count > 0
+				eps = []
+				if msg.target_addr.wildcard?
+					@outputs.each do |out|
+						eps << out if msg.target_addr.endpoint_match out[:endpoint]
+					end
+				else
+					ep = @endpoints[msg.target_addr.endpoint.downcase]
+					eps << ep if ep
+				end
+
+				# For each message block, if ID=*, apply the
+				# change to all matched endpoints.  If ID!=*,
+				# apply the change to the matching endpoint,
+				# iff that endpoint is in the eps list.
+				msg.each_block do |blk|
+					id = blk.id
+					if id == nil || id == '*'
+						eps.each do |ep|
+							update_endpoint ep, blk
+						end
+					else
+						ep = @uids[id.to_i]
+						if ep && eps.include?(ep)
+							update_endpoint ep, blk
+						end
+					end
+				end
+			end
 
 		elsif msg.is_a? XapBscQuery
-			puts "Query message for #{self}"
+			puts "Query message for #{self}, target #{msg.target_addr}, wildcard #{msg.target_addr.wildcard?}"
 
 			if msg.target_addr.wildcard?
-				# TODO: Send info messages for the matching endpoints
+				@endpoints.each do |name, ep|
+					send_info ep if msg.target_addr.endpoint_match name
+				end
 			else
 				ep = @endpoints[msg.target_addr.endpoint.downcase]
 				send_info ep if ep
@@ -106,11 +138,20 @@ class XapBscDevice < XapDevice
 
 		elsif msg.is_a? XapBscEvent
 			puts "Event message for #{self}"
+
 		end
 	end
 
 	# TODO: Ability to add and remove endpoints, with appropriate notice
 	# sent to the xAP network
+
+	def add_endpoint ephash
+		# TODO: move code from initialize here, call add_endpoint in initialize
+	end
+
+	def remove_endpoint epname_or_hash
+		# TODO
+	end
 
 	# Returns the State field of the endpoint with the given name.
 	def get_state endpoint
@@ -239,5 +280,13 @@ class XapBscDevice < XapDevice
 	# Generates a UID string for the given integer sub-UID between 1 and 254.
 	def uid_for uid
 		sprintf "#{@uid.slice(0,6)}%02X", uid
+	end
+
+	# Updates the given endpoint with values from the given XapBscBlock
+	def update_endpoint ep, block
+		puts "TODO: Updating endpoint #{ep} from #{block.inspect}"
+		# TODO: update ep with values from block, send info if no change was made
+
+		send_event ep
 	end
 end
