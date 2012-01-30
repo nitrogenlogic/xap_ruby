@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby1.9.1
-# EventMachine packet transmission and receipt loop for the xAP protocol.
+# EventMachine packet transmission and receipt handler for the xAP protocol.
 # (C)2012 Mike Bourgeous
 
 require 'eventmachine'
@@ -7,13 +7,13 @@ require 'logic_system'
 
 path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, 'xap.rb')
-require File.join(path, 'schema/xap_bsc.rb')
-require File.join(path, 'schema/xap_bsc_dev.rb')
 
 XAP_PORT=3639
 BCAST_ADDR='255.255.255.255'
 
 class XapHandler < EM::Connection
+	@@instance = nil
+
 	def self.instance
 		@@instance
 	end
@@ -133,15 +133,54 @@ class XapHandler < EM::Connection
 	end
 end
 
+module Xap
+	@@connection = nil
+
+	# Opens a UDP socket for sending and receiving xAP messages.  The
+	# EventMachine event loop must be running.
+	def self.start_xap
+		# EventMachine doesn't seem to support using '::' for IP address
+		@@connection = EM.open_datagram_socket '0.0.0.0', XAP_PORT, XapHandler, "xAP Server" unless @@connection
+		@@connection
+
+		# TODO: xAP hub support
+	end
+
+	# Closes the xAP server UDP socket, if one exists.
+	def self.stop_xap
+		@@connection.close_after_writing if @@connection
+		@@connection = nil
+	end
+
+	# Returns true if the xAP handler is connected to its UDP socket, false
+	# otherwise.
+	def self.xap_running?
+		!!XapHandler.instance
+	end
+
+	# Adds the given XapDevice to the current xAP socket server.
+	def self.add_device device
+		raise 'The xAP server is not running.  Call start_xap first.' unless @@connection
+		XapHandler.instance.add_device device
+	end
+
+	# Removes the given XapDevice from the current xAP socket server.
+	def self.remove_device device
+		raise 'The xAP server is not running.  Call start_xap first.' unless @@connection
+		XapHandler.instance.remove_device device
+	end
+end
+
 if __FILE__ == $0
+	require File.join(path, 'schema/xap_bsc.rb')
+	require File.join(path, 'schema/xap_bsc_dev.rb')
 	EM::run {
 		EM.error_handler { |e|
 			puts "Error: "
 			puts e, e.backtrace.join("\n\t")
 		}
 
-		# EventMachine doesn't seem to support using '::' for IP address
-		EM.open_datagram_socket '0.0.0.0', XAP_PORT, XapHandler, "xAP IPv4"
+		Xap.start_xap
 
 		# TODO: Add a function in xap.rb to add a device to the event handler instance
 		bscdev = XapBscDevice.new(XapAddress.parse('ACME.Lighting.apartment'), Xap.random_uid, [
@@ -150,7 +189,7 @@ if __FILE__ == $0
 			       { :endpoint => 'Output 2', :uid => 3, :State => false, :Level => [37, 924], :callback => proc { |ep| puts "Output 2 cb: #{ep}" } }
 		])
 
-		XapHandler.instance.add_device bscdev
+		Xap.add_device bscdev
 
 		EM.add_timer(2) do
 			bscdev.add_endpoint({ :endpoint => 'Output 3', :State => false, :Level => [ 0, 30 ], :callback => proc {|e|} })
@@ -159,7 +198,5 @@ if __FILE__ == $0
 		EM.add_timer(5) do
 			bscdev.remove_endpoint 'Output 1'
 		end
-
-		# TODO: xAP hub support
 	}
 end

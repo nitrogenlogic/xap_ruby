@@ -178,3 +178,4 @@ end
 
 require File.join(path, 'xap_msg.rb')
 require File.join(path, 'xap_dev.rb')
+require File.join(path, 'xap_handler.rb')

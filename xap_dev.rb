@@ -29,7 +29,8 @@ class XapDevice
 	# This should typically be called by XapHandler itself.  Subclasses may
 	# override this method in order to send messages that are supposed to
 	# be sent on initialization, so long as they call this base
-	# implementation first.
+	# implementation first.  XapHandler will call this method with nil if
+	# the device is removed from the handler or the xAP socket is closed.
 	def handler= handler
 		raise 'handler must be a XapHandler' unless handler.is_a? XapHandler
 		@handler = handler
