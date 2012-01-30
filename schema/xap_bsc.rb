@@ -346,7 +346,7 @@ class XapBscResponse < XapBscMessage
 	# responses.  Example: pass [ 1, 5 ] to specify '1/5'.
 	def level= num_denom_array
 		if num_denom_array[1] == nil || num_denom_array[1] == '%'
-			raise 'Do not use percentages or non-ranged levels for response messages.'
+			raise "Do not use percentages or non-ranged levels for response messages (#{num_denom_array})."
 		end
 		@bsc_blocks[0].level = num_denom_array
 	end
