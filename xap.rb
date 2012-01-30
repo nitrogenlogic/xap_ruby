@@ -13,7 +13,7 @@ require File.join(path, 'parser/parse_xap.rb')
 # if specified before a :, or anything to the end of an address being tested if
 # at the end of the wildcarded address.
 class XapAddress
-	attr_accessor :vendor, :product, :instance, :endpoint, :wildcard
+	attr_accessor :vendor, :product, :instance, :endpoint, :wildcard, :basewildcard, :epwildcard
 
 	# Parses the given address string into an XapAddress.  If addr is nil,
 	# returns nil.
@@ -78,14 +78,16 @@ class XapAddress
 		raise "Address #{@str} contains > not at the end of a section" if @str =~ />(?!\:|$)/
 
 		@regex, @wildcard = build_regex @str
-		@baseregex = build_regex("#{@vendor}.#{@product}.#{@instance}")[0]
+		@baseregex, @basewildcard = build_regex("#{@vendor}.#{@product}.#{@instance}")
 		if @endpoint
-			@epregex = build_regex(@endpoint)[0]
+			@epregex, @epwildcard = build_regex(@endpoint)
 		elsif @str.end_with? '>'
 			# FIXME: I believe xAP wildcard addresses are supposed to treat . and : indistinguishably
 			@epregex = //
+			@epwildcard = true
 		else
 			@epregex = /^$/
+			@epwildcard = false
 		end
 	end
 
