@@ -180,6 +180,12 @@ class XapBscDevice < XapDevice
 		nil
 	end
 
+	# Returns the UID for the endpoint with the given name, or nil if no
+	# such endpoint exists.
+	def get_uid endpoint
+		@endpoints[endpoint.downcase][:uid]
+	end
+
 	# Returns the State field of the endpoint with the given name.
 	def get_state endpoint
 		@endpoints[endpoint.downcase][:State]
