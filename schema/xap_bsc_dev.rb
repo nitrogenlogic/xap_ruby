@@ -115,7 +115,7 @@ class XapBscDevice < XapDevice
 	end
 
 	# Adds a new endpoint hash to the list of endpoints, generating an
-	# xAPBSC.info message if the addition is successful..  The endpoint's
+	# xAPBSC.info message if the addition is successful.  The endpoint's
 	# name must be unique.  UID collision will result in an exception being
 	# raised.  If the UID is not specified, the lowest available UID will
 	# be used.
