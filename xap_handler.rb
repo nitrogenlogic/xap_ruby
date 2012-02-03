@@ -1,9 +1,7 @@
-#!/usr/bin/env ruby1.9.1
 # EventMachine packet transmission and receipt handler for the xAP protocol.
 # (C)2012 Mike Bourgeous
 
 require 'eventmachine'
-require 'logic_system'
 
 path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, 'xap.rb')
@@ -171,32 +169,3 @@ module Xap
 	end
 end
 
-if __FILE__ == $0
-	require File.join(path, 'schema/xap_bsc.rb')
-	require File.join(path, 'schema/xap_bsc_dev.rb')
-	EM::run {
-		EM.error_handler { |e|
-			puts "Error: "
-			puts e, e.backtrace.join("\n\t")
-		}
-
-		Xap.start_xap
-
-		# TODO: Add a function in xap.rb to add a device to the event handler instance
-		bscdev = XapBscDevice.new(XapAddress.parse('ACME.Lighting.apartment'), Xap.random_uid, [
-			       { :endpoint => 'Input 1', :uid => 1, :State => false },
-			       { :endpoint => 'Output 1', :uid => 2, :State => true, :callback => proc { |ep| puts "Output 1 cb: #{ep}" } },
-			       { :endpoint => 'Output 2', :uid => 3, :State => false, :Level => [37, 924], :callback => proc { |ep| puts "Output 2 cb: #{ep}" } }
-		])
-
-		Xap.add_device bscdev
-
-		EM.add_timer(2) do
-			bscdev.add_endpoint({ :endpoint => 'Output 3', :State => false, :Level => [ 0, 30 ], :callback => proc {|e|} })
-		end
-
-		EM.add_timer(5) do
-			bscdev.remove_endpoint 'Output 1'
-		end
-	}
-end
