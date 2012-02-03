@@ -61,7 +61,7 @@ class XapBscDevice < XapDevice
 	# Called when a message targeting this device's address is received.
 	def receive_message msg
 		if msg.is_a? XapBscCommand
-			puts "Command message for #{self}"
+			Xap.log "Command message for #{self}"
 
 			if @output_count > 0
 				eps = []
@@ -94,7 +94,7 @@ class XapBscDevice < XapDevice
 			end
 
 		elsif msg.is_a? XapBscQuery
-			puts "Query message for #{self}, target #{msg.target_addr}, wildcard #{msg.target_addr.wildcard?}"
+			Xap.log "Query message for #{self}, target #{msg.target_addr}, wildcard #{msg.target_addr.wildcard?}"
 
 			if msg.target_addr.wildcard?
 				@endpoints.each do |name, ep|
@@ -106,10 +106,10 @@ class XapBscDevice < XapDevice
 			end
 
 		elsif msg.is_a? XapBscInfo
-			puts "Info message for #{self}"
+			Xap.log "Info message for #{self}"
 
 		elsif msg.is_a? XapBscEvent
-			puts "Event message for #{self}"
+			Xap.log "Event message for #{self}"
 
 		end
 	end
@@ -280,8 +280,6 @@ class XapBscDevice < XapDevice
 	private
 	# Send an xAPBSC.info message for the given endpoint hash.
 	def send_info ep
-		puts "XXX: Sending info"
-
 		# Send info message for endpoint (TODO: Store an info
 		# message in the endpoint hash instead of continually
 		# creating new info messages?)
@@ -296,8 +294,6 @@ class XapBscDevice < XapDevice
 
 	# Send an xAPBSC.event message for the given endpoint hash.
 	def send_event ep
-		puts "XXX: Sending event"
-
 		# Send event message for endpoint (TODO: Store an event
 		# message in the endpoint hash instead of continually
 		# creating new info messages?)
@@ -317,10 +313,7 @@ class XapBscDevice < XapDevice
 
 	# Updates the given endpoint with values from the given XapBscBlock
 	def update_endpoint ep, block
-		puts "XXX: Updating endpoint #{ep} from #{block.inspect}"
-
 		old = ep.clone
-		puts "\tBefore: #{old}"
 
 		if block.state != nil
 			case block.state
@@ -345,8 +338,6 @@ class XapBscDevice < XapDevice
 
 		ep[:Text] = block.text if ep.include?(:Text) && block.text
 		ep[:DisplayText] = block.display_text if ep.include?(:DisplayText) && block.display_text
-
-		puts "\tAfter: #{ep}"
 
 		if ep != old
 			send_event ep

@@ -45,7 +45,7 @@ class XapMessage
 		end
 		raise 'msgclass must be nil or a String' unless msgclass.nil? || msgclass.is_a?(String)
 
-		puts "Registered support for #{headername}/#{msgclass} messages via #{klass.name}"
+		Xap.log "Registered support for #{headername}/#{msgclass} messages via #{klass.name}"
 
 		# TODO: Support regex for msgclass?
 		headername.downcase!

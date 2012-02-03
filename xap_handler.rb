@@ -40,8 +40,8 @@ class XapHandler < EM::Connection
 		begin
 			msg = XapMessage.parse(d)
 		rescue Exception => e
-			puts "Error parsing incoming message: #{e}\n\t#{e.backtrace.join("\n\t")}"
-			puts "receive_data(#{d.length}) invalid: #{d.inspect}"
+			Xap.log "Error parsing incoming message: #{e}\n\t#{e.backtrace.join("\n\t")}"
+			Xap.log "receive_data(#{d.length}) invalid: #{d.inspect}"
 			return
 		end
 
@@ -53,14 +53,13 @@ class XapHandler < EM::Connection
 						handled = true
 					end
 				rescue RuntimeError => e
-					puts "Error processing message with device #{d}: #{e}\n\t#{e.backtrace.join("\n\t")}"
+					Xap.log "Error processing message with device #{d}: #{e}\n\t#{e.backtrace.join("\n\t")}"
 				end
 			end
 		end
 
-		unless handled
-			puts "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})",
-				"\t#{msg.inspect.lines.to_a.join("\t")}"
+		if !handled && $DEBUG
+			Xap.log "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})"
 		end
 	end
 

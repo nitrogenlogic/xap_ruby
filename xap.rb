@@ -174,6 +174,11 @@ module Xap
 		b = Random.rand(253) + 1
 		sprintf "FF%02X%02X00", a, b
 	end
+
+	# Prints a message using the global puts, prefixed with 'xAP: [time]'
+	def self.log msg
+		puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S.%6N %z')} - xAP - #{msg}"
+	end
 end
 
 require File.join(path, 'xap_msg.rb')
