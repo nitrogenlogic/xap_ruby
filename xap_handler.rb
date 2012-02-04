@@ -145,7 +145,7 @@ module Xap
 
 	# Closes the xAP server UDP socket, if one exists.
 	def self.stop_xap
-		@@connection.close_after_writing if @@connection
+		@@connection.close_connection_after_writing if @@connection
 		@@connection = nil
 	end
 
