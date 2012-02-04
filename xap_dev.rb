@@ -21,7 +21,7 @@ class XapDevice
 	def initialize address, uid, interval
 		raise 'Heartbeat interval must be a Fixnum or nil' if interval && !interval.is_a?(Fixnum)
 		set_address address
-		set_uid uid
+		self.uid = uid
 		@interval = interval
 	end
 
@@ -68,7 +68,7 @@ class XapDevice
 
 	# Changes the UID used by this device.  Subclasses should call this if
 	# the four-digit reassignable component of the UID is changed.
-	def set_uid uid
+	def uid= uid
 		unless uid =~ /^FF[0-9A-Z]{4}00$/i && !(uid.slice(2, 4) =~ /(?:^(?:00|FF)|(?:00|FF)$)/i)
 			raise "uid must be eight hex digits of the form FF(01..FE)(01..FE)00, not #{uid}."
 		end

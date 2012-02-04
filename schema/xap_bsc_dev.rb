@@ -58,6 +58,18 @@ class XapBscDevice < XapDevice
 		end
 	end
 
+	# Sets the xAP UID of this virtual device, then sends an xAPBSC.info
+	# message for all endpoints.
+	def uid= uid
+		super uid
+
+		if @endpoints
+			@endpoints.each do |name, ep|
+				send_info ep
+			end
+		end
+	end
+
 	# Called when a message targeting this device's address is received.
 	def receive_message msg
 		if msg.is_a? XapBscCommand
