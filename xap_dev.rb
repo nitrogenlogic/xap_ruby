@@ -48,9 +48,10 @@ class XapDevice
 	end
 
 	protected
-	# Uses the associated XapHandler to send the given message.
+	# Uses the associated XapHandler to send the given message.  Does
+	# nothing if there is no handler set.
 	def send_message message
-		@handler.send_message message
+		@handler.send_message message if @handler
 	end
 
 	# TODO: Ability to request incoming messages matching a particular
