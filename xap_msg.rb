@@ -70,6 +70,7 @@ class XapMessage
 		@uid = src_uid
 		@msgclass = msgclass
 		@blocks = {}
+		@headers = {}
 	end
 
 	# Returns a string representation of the message suitable for

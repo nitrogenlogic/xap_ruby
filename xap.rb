@@ -63,7 +63,7 @@ class XapAddress
 		@vendor = vendor.to_s
 		@product = product.to_s
 		@instance = instance.to_s
-		@endpoint = endpoint.to_s if endpoint
+		@endpoint = endpoint ? endpoint.to_s : nil
 
 		# Many of the xAP standard's own examples violate the length limits...
 		#raise 'vendor is too long' if @vendor.length > 8
