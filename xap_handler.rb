@@ -137,7 +137,7 @@ module Xap
 	# EventMachine event loop must be running.
 	def self.start_xap
 		# EventMachine doesn't seem to support using '::' for IP address
-		@@connection = EM.open_datagram_socket '0.0.0.0', XAP_PORT, XapHandler, "xAP Server" unless @@connection
+		@@connection ||= EM.open_datagram_socket '0.0.0.0', XAP_PORT, XapHandler, "xAP Server" unless @@connection
 		@@connection
 
 		# TODO: xAP hub support
