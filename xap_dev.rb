@@ -32,7 +32,7 @@ class XapDevice
 	# implementation first.  XapHandler will call this method with nil if
 	# the device is removed from the handler or the xAP socket is closed.
 	def handler= handler
-		raise 'handler must be a XapHandler' unless handler.is_a? XapHandler
+		raise 'handler must be a XapHandler' unless handler.nil? || handler.is_a?(XapHandler)
 		@handler = handler
 	end
 
