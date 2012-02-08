@@ -52,22 +52,21 @@ class XapBscDevice < XapDevice
 	# state of all input and output blocks as xAPBSC.info messages.
 	def handler= handler
 		super handler
-
-		@endpoints.each do |name, ep|
-			send_info ep
-		end
+		announce_endpoints
 	end
 
 	# Sets the xAP UID of this virtual device, then sends an xAPBSC.info
 	# message for all endpoints.
 	def uid= uid
 		super uid
+		announce_endpoints
+	end
 
-		if @endpoints
-			@endpoints.each do |name, ep|
-				send_info ep
-			end
-		end
+	# Sets the xAP address of this virtual device, then sends an
+	# xAPBSC.info message for all endpoints.
+	def set_address address
+		super address
+		announce_endpoints
 	end
 
 	# Called when a message targeting this device's address is received.
@@ -290,6 +289,15 @@ class XapBscDevice < XapDevice
 	# FIXME: If multiple fields need to change at once, don't send
 	# info/event messages until after all the fields are changed.
 	private
+	# Send an xAPBSC.info message for all endpoints.
+	def announce_endpoints
+		if @endpoints
+			@endpoints.each do |name, ep|
+				send_info ep
+			end
+		end
+	end
+
 	# Send an xAPBSC.info message for the given endpoint hash.
 	def send_info ep
 		# Send info message for endpoint (TODO: Store an info
