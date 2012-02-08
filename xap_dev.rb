@@ -55,7 +55,7 @@ class XapDevice
 	end
 
 	# TODO: Ability to request incoming messages matching a particular
-	# source address
+	# source address, using add_receiver/remove_receiver
 
 	# Changes the address used by this device.  Subclasses should call this
 	# if, for example, the user-assigned name of the device is changed.

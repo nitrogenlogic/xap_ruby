@@ -24,6 +24,7 @@ class XapHandler < EM::Connection
 		@@instance = self
 		@servername = servername
 		@devices = []
+		@receivers = []
 		@timers = {}
 	end
 
@@ -58,6 +59,12 @@ class XapHandler < EM::Connection
 			end
 		end
 
+		@receivers.each do |rcv|
+			if rcv[0] =~ msg.src_addr
+				rcv[1].call msg
+			end
+		end
+
 		if !handled && $DEBUG
 			Xap.log "Received a #{msg.class.name} message (#{msg.src_addr.inspect} => #{msg.target_addr.inspect})"
 		end
@@ -89,6 +96,24 @@ class XapHandler < EM::Connection
 		timer = @timers.delete device
 		timer.cancel if timer
 		device.handler = nil
+	end
+
+	# Adds a callback to be called with the XapMessage when a message is
+	# received from the given source address (src_addr may be wildcarded).
+	def add_receiver src_addr, callback
+		raise 'src_addr must be an XapAddress' unless src_addr.is_a? XapAddress
+		raise 'callback must be callable' unless callback.respond_to? :call
+		@receivers << [src_addr, callback]
+		self
+	end
+
+	# Removes an address/callback pair from the list of callbacks called
+	# when a matching message is received.
+	def remove_receiver src_addr, callback
+		@receivers.delete_if { |rcv|
+			rcv[0] == src_addr && rcv[1] == callback
+		}
+		nil
 	end
 
 	# Sends an XapMessage to the network.
@@ -165,6 +190,18 @@ module Xap
 	def self.remove_device device
 		raise 'The xAP server is not running.  Call start_xap first.' unless @@connection
 		XapHandler.instance.remove_device device
+	end
+
+	# Adds a message receiver to the current xAP socket server.
+	def self.add_receiver src_addr, callback
+		raise 'The xAP server is not running.  Call start_xap first.' unless @@connection
+		XapHandler.instance.add_receiver src_addr, callback
+	end
+
+	# Removes a message receiver from the current xAP socket server.
+	def self.remove_receiver src_addr, callback
+		raise 'The xAP server is not running.  Call start_xap first.' unless @@connection
+		XapHandler.instance.remove_receiver src_addr, callback
 	end
 end
 
