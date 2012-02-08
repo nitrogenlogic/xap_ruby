@@ -16,10 +16,6 @@ class XapHandler < EM::Connection
 		@@instance
 	end
 
-	def puts *a
-		STDOUT.puts "#{@servername}: #{a.join("\n")}"
-	end
-
 	def initialize servername
 		@@instance = self
 		@servername = servername
