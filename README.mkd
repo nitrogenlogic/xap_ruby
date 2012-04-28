@@ -31,6 +31,13 @@ test/xap\_receive.sh and test/xap\_query.sh on another machine.
 * test/xap\_query.sh uses netcat to send a network-wide xAP query message.
 * test/xap\_receive.rb prints all xAP messages received from the network.
 
+Users of xap\_ruby
+------------------
+Submit a pull request if you use this library somewhere and would like a
+mention here.
+
+* [Nitrogen Logic](http://www.nitrogenlogic.com/) - [Depth Camera Controller](http://www.nitrogenlogic.com/products/depth_controller.html)
+
 Copyright
 ---------
 (C)2012 Mike Bourgeous, licensed under two-clause BSD (see LICENSE)
