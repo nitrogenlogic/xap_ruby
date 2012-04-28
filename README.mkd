@@ -4,7 +4,8 @@ This is a Ruby library written from scratch for communicating with a home
 automation network using the xAP protocol.  Supports sending and receiving
 arbitrary xAP messages, triggering callbacks on certain received messages,
 etc.  Also includes an implementation of an xAP Basic Status and Control
-device.  Incoming xAP messages are parsed using Treetop.
+device.  Incoming xAP messages are parsed using Treetop.  Network events are
+handled using EventMachine.
 
 This library strives to support all address wildcard modes and data types
 specified by the xAP specification as correctly as possible.
