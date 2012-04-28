@@ -1,0 +1,35 @@
+xap\_ruby
+=========
+This is a Ruby library written from scratch for communicating with a home
+automation network using the xAP protocol.  Supports sending and receiving
+arbitrary xAP messages, triggering callbacks on certain received messages,
+etc.  Also includes an implementation of an xAP Basic Status and Control
+device.  Incoming xAP messages are parsed using Treetop.
+
+This library strives to support all address wildcard modes and data types
+specified by the xAP specification as correctly as possible.
+
+Read the examples under test/ to understand how to create your own applications
+using xap\_ruby.  All user-facing classes should have documenting comments.
+
+xAP
+---
+xAP is a broadcast UDP protocol for interfacing disparate home automation
+systems and devices.  Despite its weaknesses, xAP support is available for many
+DIY and enthusiast automation systems.  For more information on xAP, visit
+http://www.xapautomation.org/.
+
+Testing
+-------
+There are no automated tests.  You can test the code by running
+test/bscdev\_test.rb to simulate an xAP BSC device, then running
+test/xap\_receive.sh and test/xap\_query.sh on another machine.
+
+* test/bsdev\_test.rb creates a dummy xAP Basic Status and Control device.
+* test/parser\_test.rb tests the Treetop parser with a variety of xAP data types.
+* test/xap\_query.sh uses netcat to send a network-wide xAP query message.
+* test/xap\_receive.rb prints all xAP messages received from the network.
+
+Copyright
+---------
+(C)2012 Mike Bourgeous, licensed under two-clause BSD (see LICENSE)
