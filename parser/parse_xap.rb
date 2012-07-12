@@ -16,6 +16,7 @@ Treetop.load(File.join(path, 'xap.treetop'))
 module ParseXap
 	@@parser = XapParser.new
 
+	# Returns a Treetop node tree for the given xAP message
 	def self.parse(data)
 		tree = @@parser.parse(data, :root => :message)
 
@@ -24,5 +25,20 @@ module ParseXap
 		end
 
 		tree
+	end
+
+	# Returns a hash that is equivalent to calling parse(data).to_hash(),
+	# but much faster.  However, this method does not do any explicit
+	# checking for invalid messages or values.
+	def self.simple_parse(data)
+		Hash[*data.split(/}\n?/).map {|v|
+			bl = v.split("\n{\n")
+			bl[1] = Hash[*bl[1].split("\n").map {|v2|
+				pair = v2.split(/[=!]/, 2)
+				pair[1] = [pair[1]].pack 'H*' if v2 =~ /^[^=!]+!/
+				pair
+			}.flatten!]
+			bl
+		}.flatten!(1)]
 	end
 end

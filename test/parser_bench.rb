@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby1.9.1
-# A speed test for the xAP Treetop parser.
+# A speed test for the xAP parser.
 # (C)2012 Mike Bourgeous
 
 require 'benchmark'
@@ -40,13 +40,17 @@ mytext=6/3
 	count = ARGV[0] || 10000
 	count = count.to_i
 
+	hash = nil
+	bench("ParseXap.simple_parse", count) {
+		 hash = ParseXap.simple_parse(msg)
+	}
+
 	node = nil
 	bench("ParseXap.parse", count) {
 		node = ParseXap.parse(msg)
 	}
 
-	str = nil
 	bench("node.to_hash", count) {
-		str = node.to_hash
+		hash = node.to_hash
 	}
 end

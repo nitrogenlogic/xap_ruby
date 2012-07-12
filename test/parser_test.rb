@@ -39,5 +39,17 @@ mytext=6/3
 			end
 		rescue StopIteration
 		end
+
+		exit -1
+	end
+
+	hash = ParseXap.simple_parse(msg)
+	puts hash
+	if hash != node.to_hash
+		puts "Simple parsed hash and node hash do not match!"
+		puts "Node hash: #{node.to_hash}"
+		puts "Simple parse: #{hash}"
+
+		exit -1
 	end
 end
