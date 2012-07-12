@@ -5,8 +5,7 @@ path = File.expand_path(File.dirname(__FILE__))
 require File.join(path, 'xap.rb')
 
 # Base class for all xAP message types.  Registered subclasses must implement
-# a parse method that accepts the Treetop node hierarchy and resulting hash as
-# its first two parameters.
+# a parse method that accepts the message hash as its first parameter.
 class XapMessage
 	@@msgtypes = {}
 
@@ -17,10 +16,9 @@ class XapMessage
 	def self.parse data
 		raise 'data must be (convertible to) a String' unless data.respond_to? :to_s
 
-		msg = ParseXap.parse data.to_s
-		msghash = msg.to_hash
+		msghash = ParseXap.simple_parse data.to_s
 
-		headername = msg.first_block.downcase
+		headername = msghash.keys[0].downcase
 		raise "No handlers defined for #{headername} message headers." unless @@msgtypes[headername]
 
 		classname = msghash[headername]['class']
@@ -30,7 +28,7 @@ class XapMessage
 		handler = @@msgtypes[headername][classname] || @@msgtypes[headername][nil]
 		raise "No handler defined for #{headername}/#{classname} messages." unless handler
 
-		handler.parse msg, msghash
+		handler.parse msghash
 	end
 
 	# Registers the given klass as the handler for msgclass messages, with
@@ -155,16 +153,16 @@ end
 class XapUnsupportedMessage < XapMessage
 	XapMessage.register_class self, nil
 
-	def self.parse msg, hash
-		self.new msg, hash, nil
+	def self.parse hash
+		self.new hash, nil, nil
 	end
 
 	def initialize msgclass, src_addr, src_uid, target_addr = nil
 		@headername ||= 'xap-header'
-		if msgclass.is_a?(Treetop::Runtime::SyntaxNode) && src_addr.is_a?(Hash)
-			parse_header src_addr[@headername]
+		if msgclass.is_a?(Hash)
+			parse_header msgclass[@headername]
 
-			blocks = src_addr.clone
+			blocks = msgclass.clone
 			blocks.delete @headername
 			set_blocks blocks
 		else
@@ -179,15 +177,15 @@ class XapHeartbeat < XapMessage
 
 	attr_accessor :interval
 
-	def self.parse msg, hash
-		self.new msg, hash
+	def self.parse hash
+		self.new hash, nil
 	end
 
 	def initialize src_addr, src_uid, interval = 60
 		@headername = 'xap-hbeat'
-		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
-			parse_header src_uid[@headername]
-			interval = src_uid[@headername]['interval'] || interval
+		if src_addr.is_a?(Hash)
+			parse_header src_addr[@headername]
+			interval = src_addr[@headername]['interval'] || interval
 		else
 			super 'xap-hbeat.alive', src_addr, src_uid
 		end

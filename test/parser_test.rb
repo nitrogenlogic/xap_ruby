@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby1.9.1
-# A test for the xAP Treetop parser.
+# A test for the xAP parser.
 # (C)2012 Mike Bourgeous
 
 path = File.expand_path(File.dirname(__FILE__))

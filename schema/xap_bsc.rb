@@ -143,14 +143,14 @@ class XapBscBlock
 end
 
 class XapBscMessage < XapUnsupportedMessage
-	def self.parse msg, hash
-		self.new msg, hash, nil, nil, nil
+	def self.parse hash
+		self.new hash, nil, nil, nil, nil
 	end
 
 	def initialize msgclass, src_addr, src_uid, target_addr, is_input
 		super msgclass, src_addr, src_uid, target_addr
 
-		if msgclass.is_a?(Treetop::Runtime::SyntaxNode) && src_addr.is_a?(Hash)
+		if msgclass.is_a?(Hash)
 			raise 'xAP BSC messages must have at least one block' if @blocks.length == 0
 			@is_input = @blocks.keys[0].downcase.start_with? 'input'
 		else
@@ -193,7 +193,7 @@ class XapBscCommand < XapBscMessage
 	# Initializes an xAP BSC command message with the given source address
 	# and UID and target address.  Any subsequent arguments are ignored.
 	def initialize src_addr, src_uid, target_addr, *args
-		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
+		if src_addr.is_a?(Hash)
 			super src_addr, src_uid, nil, nil, nil
 		else
 			super 'xAPBSC.cmd', src_addr, src_uid, target_addr, false
@@ -300,7 +300,7 @@ class XapBscQuery < XapBscMessage
 	# Initializes an xAP BSC query message with the given source address
 	# and UID and target address.  Any subsequent arguments are ignored.
 	def initialize src_addr, src_uid, target_addr, *args
-		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
+		if src_addr.is_a?(Hash)
 			super src_addr, src_uid, nil, nil, nil
 		else
 			super 'xAPBSC.query', src_addr, src_uid, target_addr
@@ -319,7 +319,7 @@ class XapBscResponse < XapBscMessage
 	# message; if is_input is falsy, this will be an output.state message.
 	# Any subsequent arguments are ignored.
 	def initialize src_addr, src_uid, is_input, *args
-		if src_addr.is_a?(Treetop::Runtime::SyntaxNode) && src_uid.is_a?(Hash)
+		if src_addr.is_a?(Hash)
 			super src_addr, src_uid, nil, nil, nil
 		else
 			super self.class.classname, src_addr, src_uid, nil, is_input
