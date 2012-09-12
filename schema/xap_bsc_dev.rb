@@ -229,13 +229,18 @@ class XapBscDevice < XapDevice
 	# If level is a Fixnum, only the numerator is replaced.  If the new
 	# level is different from the old level, an event message will be
 	# generated.  Otherwise, an info message will be generated.  Error
-	# checking is not performed on the level parameter.
+	# checking is not performed on the level parameter.  Pass nil to remove
+	# the level from this endpoint.
 	def set_level endpoint, level
 		ep = @endpoints[endpoint.downcase]
 
-		level = [ level, ep[:Level][1] ] if level.is_a? Fixnum
 		old = ep[:Level]
-		ep[:Level] = level
+		if level != nil
+			level = [ level, ep[:Level][1] ] if level.is_a? Fixnum
+			ep[:Level] = level
+		else
+			ep.delete :Level
+		end
 
 		if level != old
 			send_event ep
