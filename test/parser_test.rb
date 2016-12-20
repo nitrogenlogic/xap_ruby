@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby1.9.1
+#!/usr/bin/env ruby
 # A test for the xAP parser.
 # (C)2012 Mike Bourgeous
 

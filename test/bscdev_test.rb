@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby1.9.1
+#!/usr/bin/env ruby
 # Test of a single xAP BSC virtual device.
 # (C)2012 Mike Bourgeous
 

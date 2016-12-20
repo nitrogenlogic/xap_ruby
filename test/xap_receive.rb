@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby1.9.1
+#!/usr/bin/env ruby
 # Displays all xAP messages received.
 # (C)2012 Mike Bourgeous
 

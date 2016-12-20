@@ -21,6 +21,15 @@ systems and devices.  Despite its weaknesses, xAP support is available for many
 DIY and enthusiast automation systems.  For more information on xAP, visit
 http://www.xapautomation.org/.
 
+Installation
+------------
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'xap_ruby'
+```
+
 Testing
 -------
 There are no automated tests.  You can test the code by running
@@ -41,4 +50,5 @@ mention here.
 
 Copyright
 ---------
-(C)2012 Mike Bourgeous, licensed under two-clause BSD (see LICENSE)
+(C)2012-2016 Mike Bourgeous (and any Git contributors), licensed under
+two-clause BSD (see LICENSE)
