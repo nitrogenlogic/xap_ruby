@@ -2,8 +2,8 @@
 # A test for the xAP parser.
 # (C)2012 Mike Bourgeous
 
-path = File.expand_path(File.dirname(__FILE__))
-require File.join(path, '..', 'parser', 'parse_xap.rb')
+require 'bundler/setup'
+require 'xap_ruby'
 
 if File.expand_path(__FILE__) == File.expand_path($0)
 	msg = <<-EOF
@@ -24,7 +24,7 @@ Another.Block
 mytext=6/3
 }
 	EOF
-	node = ParseXap.parse(msg)
+	node = Xap::Parser::ParseXap.parse(msg)
 	puts node.to_hash, node
 
 	s = node.to_s
@@ -43,7 +43,7 @@ mytext=6/3
 		exit -1
 	end
 
-	hash = ParseXap.simple_parse(msg)
+	hash = Xap::Parser::ParseXap.simple_parse(msg)
 	puts hash
 	if hash != node.to_hash
 		puts "Simple parsed hash and node hash do not match!"

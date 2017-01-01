@@ -1,7 +1,7 @@
 # Treetop node extensions for parsing xAP
 # (C)2012 Mike Bourgeous
 
-module Xap
+module XapTreetop
 	class Keyword < Treetop::Runtime::SyntaxNode
 	end
 
