@@ -34,7 +34,7 @@ module Xap
 			def self.simple_parse(data)
 				Hash[*data.split(/}\n?/).map {|v|
 					bl = v.split("\n{\n")
-					bl[1] = Hash[*bl[1].split("\n").map {|v2|
+					bl[1] = Hash[*bl[1].to_s.split("\n").map {|v2|
 						pair = v2.split(/[=!]/, 2)
 						pair[1] = [pair[1]].pack 'H*' if v2 =~ /^[^=!]+!/
 						pair
