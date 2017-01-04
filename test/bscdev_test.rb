@@ -23,10 +23,12 @@ if __FILE__ == $0
 		Xap.add_device bscdev
 
 		EM.add_timer(2) do
+			puts "--- Adding new endpoint Output 3"
 			bscdev.add_endpoint({ :endpoint => 'Output 3', :State => false, :Level => [ 0, 30 ], :callback => proc {|e|} })
 		end
 
 		EM.add_timer(5) do
+			puts "--- Removing endpoint Output 1"
 			bscdev.remove_endpoint 'Output 1'
 		end
 	}
