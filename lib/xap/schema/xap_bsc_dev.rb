@@ -107,11 +107,21 @@ module Xap
 
 					if msg.target_addr.wildcard?
 						@endpoints.each do |name, ep|
-							send_info ep if msg.target_addr.endpoint_match name
+							if msg.target_addr.endpoint_match name
+								Xap.log "Matching endpoint found: #{ep[:endpoint]}"
+								send_info ep
+							end
+						end
+					elsif msg.target_addr.endpoint
+						ep = @endpoints[msg.target_addr.endpoint.to_s.downcase]
+						if ep
+							Xap.log "Matching endpoint found: #{ep[:endpoint]}"
+							send_info ep
+						else
+							Xap.log "No matching endpoint found"
 						end
 					else
-						ep = @endpoints[msg.target_addr.endpoint.downcase]
-						send_info ep if ep
+						Xap.log "Error: No endpoint was given in the query"
 					end
 
 				elsif msg.is_a? XapBscInfo

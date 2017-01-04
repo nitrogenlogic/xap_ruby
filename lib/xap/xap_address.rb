@@ -134,8 +134,10 @@ module Xap
 		def endpoint_match other
 			if other.is_a? String
 				other =~ @epregex
-			else
+			elsif other.respond_to?(:endpoint)
 				other.endpoint =~ @epregex
+			else
+				false
 			end
 		end
 
@@ -153,6 +155,7 @@ module Xap
 		private
 		# Builds a regular expression for a wildcarded xAP string
 		def build_regex str
+			# FIXME: escape all regex characters with Regexp.escape, without breaking * wildcard
 			regex = str.gsub '.', '\\.'
 			wildcard = !!(str =~ /[*>]/)
 			if wildcard
