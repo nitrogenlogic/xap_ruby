@@ -4,4 +4,4 @@ module Xap
 end
 
 require_relative 'schema/xap_bsc'
-require_relative 'schema/xap_bsc_dev'
+require_relative 'schema/xap_bsc_device'
