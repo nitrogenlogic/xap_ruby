@@ -10,7 +10,12 @@ Gem::Specification.new do |spec|
   spec.email         = ['mike@mikebourgeous.com']
 
   spec.summary       = %q{A Ruby gem for the xAP home automation protocol.}
-  spec.description   = <<-EOF
+  spec.description   = <<-EOF.gsub(/^  /, '')
+  This gem provides basic xAP Automation protocol support for EventMachine
+  applications.  It was developed for use in Nitrogen Logic controller software.
+  There are no automated tests and the code could be improved in many ways, but it
+  may still be useful to someone.
+
   This is a Ruby library written from scratch for communicating with a home
   automation network using the xAP protocol.  Supports sending and receiving
   arbitrary xAP messages, triggering callbacks on certain received messages, etc.
@@ -19,7 +24,7 @@ Gem::Specification.new do |spec|
   String#split() and Array#map() (a validating Treetop parser is also available).
   Network events are handled using EventMachine.
   EOF
-  spec.homepage      = 'https:'
+  spec.homepage      = 'https://github.com/nitrogenlogic/xap_ruby/'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})

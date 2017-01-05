@@ -1,5 +1,10 @@
 xap\_ruby
 =========
+This gem provides basic xAP Automation protocol support for EventMachine
+applications.  It was developed for use in Nitrogen Logic controller software.
+There are no automated tests and the code could be improved in many ways, but it
+may still be useful to someone.
+
 This is a Ruby library written from scratch for communicating with a home
 automation network using the xAP protocol.  Supports sending and receiving
 arbitrary xAP messages, triggering callbacks on certain received messages,
@@ -11,7 +16,7 @@ available).  Network events are handled using EventMachine.
 This library strives to support all address wildcard modes and data types
 specified by the xAP specification as correctly as possible.
 
-Read the examples under test/ to understand how to create your own applications
+Read the examples under `test/` to understand how to create your own applications
 using xap\_ruby.  All user-facing classes should have documenting comments.
 
 xAP
@@ -30,8 +35,8 @@ Add this line to your application's Gemfile:
 gem 'xap_ruby'
 ```
 
-Testing
--------
+Testing and Examples
+--------------------
 There are no automated tests.  You can test the code by running
 test/bscdev\_test.rb to simulate an xAP BSC device, then running
 test/xap\_receive.sh and test/xap\_query.sh on another machine.
@@ -50,5 +55,5 @@ mention here.
 
 Copyright
 ---------
-(C)2012-2016 Mike Bourgeous (and any Git contributors), licensed under
+(C)2012-2017 Mike Bourgeous (and any Git contributors), licensed under
 two-clause BSD (see LICENSE)
