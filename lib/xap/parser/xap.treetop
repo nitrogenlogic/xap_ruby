@@ -1,7 +1,7 @@
 # Treetop grammar file for parsing xAP
 # (C)2012 Mike Bourgeous
 
-grammar Xap
+grammar XapTreetop
 	rule keyword
 		# The xAP message grammar in the spec doesn't say that periods
 		# can be included in keywords, but the example messages include

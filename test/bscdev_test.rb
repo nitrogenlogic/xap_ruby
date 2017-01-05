@@ -1,13 +1,9 @@
-#!/usr/bin/env ruby1.9.1
+#!/usr/bin/env ruby
 # Test of a single xAP BSC virtual device.
 # (C)2012 Mike Bourgeous
 
-require 'eventmachine'
-
-path = File.expand_path(File.dirname(__FILE__))
-require File.join(path, '..', 'xap.rb')
-require File.join(path, '..', 'schema', 'xap_bsc.rb')
-require File.join(path, '..', 'schema', 'xap_bsc_dev.rb')
+require 'bundler/setup'
+require 'xap_ruby'
 
 if __FILE__ == $0
 	EM::run {
@@ -18,7 +14,7 @@ if __FILE__ == $0
 
 		Xap.start_xap
 
-		bscdev = XapBscDevice.new(XapAddress.parse('ACME.Lighting.apartment'), Xap.random_uid, [
+		bscdev = Xap::Schema::XapBscDevice.new(Xap::XapAddress.parse('ACME.Lighting.apartment'), Xap.random_uid, [
 			       { :endpoint => 'Input 1', :uid => 1, :State => false },
 			       { :endpoint => 'Output 1', :uid => 2, :State => true, :callback => proc { |ep| puts "Output 1 cb: #{ep}" } },
 			       { :endpoint => 'Output 2', :uid => 3, :State => false, :Level => [37, 924], :callback => proc { |ep| puts "Output 2 cb: #{ep}" } }
@@ -27,10 +23,12 @@ if __FILE__ == $0
 		Xap.add_device bscdev
 
 		EM.add_timer(2) do
+			puts "--- Adding new endpoint Output 3"
 			bscdev.add_endpoint({ :endpoint => 'Output 3', :State => false, :Level => [ 0, 30 ], :callback => proc {|e|} })
 		end
 
 		EM.add_timer(5) do
+			puts "--- Removing endpoint Output 1"
 			bscdev.remove_endpoint 'Output 1'
 		end
 	}

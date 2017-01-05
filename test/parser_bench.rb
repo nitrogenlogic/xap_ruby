@@ -1,11 +1,10 @@
-#!/usr/bin/env ruby1.9.1
+#!/usr/bin/env ruby
 # A speed test for the xAP parser.
 # (C)2012 Mike Bourgeous
 
+require 'bundler/setup'
 require 'benchmark'
-path = File.expand_path(File.dirname(__FILE__))
-require File.join(path, '..', 'parser', 'parse_xap.rb')
-
+require 'xap_ruby'
 
 def bench name, count, &block
 	puts "Running #{count} iterations of #{name}"
@@ -42,12 +41,12 @@ mytext=6/3
 
 	hash = nil
 	bench("ParseXap.simple_parse", count) {
-		 hash = ParseXap.simple_parse(msg)
+		 hash = Xap::Parser::ParseXap.simple_parse(msg)
 	}
 
 	node = nil
 	bench("ParseXap.parse", count) {
-		node = ParseXap.parse(msg)
+		node = Xap::Parser::ParseXap.parse(msg)
 	}
 
 	bench("node.to_hash", count) {
